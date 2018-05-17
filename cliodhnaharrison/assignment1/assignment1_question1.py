@@ -3,7 +3,7 @@ import string
 string_one = input()
 string_two = input()
 
-alphabet = list(string.ascii_lowercase)
+alphabet = list(string.ascii_lowercase + string.ascii_uppercase)
 
 anagram = True
 
