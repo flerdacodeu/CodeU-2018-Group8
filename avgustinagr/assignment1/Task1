@@ -1,0 +1,33 @@
+class Node:
+    def __init__(self, val):
+        self.val = val
+        self.next = None
+
+class SLList:
+    def __init__(self):
+        self.front = None
+        self.size = 0
+
+    def add(self, val):
+        toadd=Node(val)
+        iter=self.front
+        while iter.next is not None:
+            iter=iter.next
+        iter.next=toadd
+        self.size += 1
+
+    def kthtolast(self, k):
+        print "self size: " ,self.size
+        k=abs(k)%self.size               #negative numbers are made positive and the
+        node = self.front                #remainder of larger ones is being taken
+        num=self.size-k
+        while num>0 and node.next is not None:
+            node = node.next
+            num-=1
+        return node.val
+
+    def printList(self):
+        node = self.front
+        while node is not None:
+            print node.val
+            node=node.next
