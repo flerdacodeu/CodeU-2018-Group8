@@ -2,16 +2,21 @@
 
 import string
 
+#Input through command line
 string_one = input()
 string_two = input()
 
 def anagram_finder(string_one, string_two, case_sensitive=False):
     anagram = True
+
+    #Gets a list of ascii characters
     alphabet = list(string.printable)
 
     if case_sensitive:
         for char in alphabet:
             if anagram:
+                #Counts occurences of a character in both strings
+                #If there is a difference it returns False
                 if string_one.count(char) != string_two.count(char):
                     anagram = False
             else:
@@ -24,10 +29,13 @@ def anagram_finder(string_one, string_two, case_sensitive=False):
         string_two = string_two.lower()
         for char in alphabet:
             if anagram:
+                #Counts occurences of a character in both strings
+                #If there is a difference it returns False
                 if string_one.count(char) != string_two.count(char):
                     anagram = False
             else:
                 return anagram
         return anagram
 
-print (anagram_finder(string_one, string_two))
+#My Testing
+#print (anagram_finder(string_one, string_two))

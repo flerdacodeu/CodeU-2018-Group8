@@ -1,7 +1,10 @@
 #Using Python 3
 
 class Node:
-
+    """
+    My node class for each node in the linked list.
+    Each node has a value and a next node.
+    """
     def __init__(self, value, next=None):
         self.value = value
         self.next = next
@@ -15,7 +18,14 @@ class Node:
     def set_next(self, new):
         self.next = new
 
+
+
 class LinkedList:
+    """
+    My class for a singly linked list.
+    Each list has a head.
+    Nodes can be inserted.
+    """
 
     def __init__(self, head=None):
         self.head = head
@@ -39,7 +49,6 @@ class LinkedList:
         length = self.get_length()
         while curr:
             count += 1
-            print (count, length - k)
             if (length - k) == count:
                 return curr.get_node_value()
             else:
@@ -48,8 +57,9 @@ class LinkedList:
         return None
 
 
-l = LinkedList()
-l.insert(5)
-l.insert(6)
-print (l.get_length())
-print(l.find_kth_to_last(0))
+#My Testing
+#l = LinkedList()
+#l.insert(5)
+#l.insert(6)
+#print (l.get_length())
+#print(l.find_kth_to_last(0))
