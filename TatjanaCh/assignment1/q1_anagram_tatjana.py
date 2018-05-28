@@ -96,7 +96,6 @@ def anagrams_memory(s1, s2, case_sensitive=True, empty_strings_anagrams=True):
 def sentence_anagram_of(s1, s2, case_sensitive=True, empty_strings_anagrams=True):
     """
     Returns true if each word of the second sentence is an anagram-word of the first.
-    
     Assumption: words are separated by whitespace(s), \n, \t
     :param s1: [str]
     :param s2: [str]
