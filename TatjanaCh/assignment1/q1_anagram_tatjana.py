@@ -1,25 +1,36 @@
-# Created on 21.05.18, by Tatjana
-# tatjana.chavdarova@{epfl,idiap}.ch
 ##########################################################################
-# Assumption: only letters are considered (white space & punct. are ignored)
-# Assumption: empty strings are anagrams
 # python 3
 ##########################################################################
-import time
 import re
+from collections import defaultdict
 
 
-def letters_occurrences(_str):
-    _dict = {}
-    for l in _str:
-        if l not in _dict:
-            _dict[l] = 1
-        else:
-            _dict[l] += 1
+def letters_occurrences(_str, _dict=None, inc=1):
+    """
+    Counts the occurrences of the unique letters in the input string.
+    :param _str: [string]
+    :param _dict: [dict, optional] dictionary whose keys are letters and values integers. Default: None
+    :param inc: [int, optional] Increment/Decrement value for each occurrence. Default: 1
+    :return: dictionary whose keys are the encountered letters and values their occurrences
+    """
+    _dict = _dict if _dict is not None else defaultdict(int)
+
+    for char in _str:
+        _dict[char] += inc
     return _dict
 
 
-def anagrams(s1, s2, case_sensitive=True):
+def anagrams(s1, s2, case_sensitive=True, empty_strings_anagrams=True):
+    """
+    Determines if two input strings are anagrams. Two words are anagrams, if they consist of the same letters and 
+    numbers, irrespective of their order or extra non alphanumeric characters.
+    :param s1: [string] 
+    :param s2: [string]
+    :param case_sensitive: [bool, optional] case sensitive. Default: True
+    :param empty_strings_anagrams: [bool, optional] If True, two empty strings (or having only non alphanumeric 
+    characters) are considered anagrams. Default: True
+    :return: [bool]
+    """
     if not case_sensitive:
         s1 = s1.lower()
         s2 = s2.lower()
@@ -27,12 +38,13 @@ def anagrams(s1, s2, case_sensitive=True):
     s1 = re.sub(r'\W+', '', s1)
     s2 = re.sub(r'\W+', '', s2)
 
-    # if empty strings are *not* anagrams, uncomment:
-    # if 0 in [len(s1), len(s2)]:
-    #     return False
-
     if len(s1) != len(s2):  # to avoid computation
         return False
+    elif len(s1) == len(s2) == 0:
+        if empty_strings_anagrams:
+            return True
+        else:
+            return False
 
     dict_s1 = letters_occurrences(s1)  # O(|s1|)
     dict_s2 = letters_occurrences(s2)  # O(|s2|)
@@ -45,85 +57,96 @@ def anagrams(s1, s2, case_sensitive=True):
 
     return True  # max(O(|s1|), O(|s2|))
 
-##########################################################################
-stime = time.time()
 
-test_cases = []  # each element: str1, str2, caseSensitive, label
-test_cases.append(['', '', None, True])  # assumption: empty strings are anagrams
-test_cases.append(['...', '!!!', None, True])  # assumption: empty strings are anagrams
-test_cases.append(['listen', 'silent', None, True])
-test_cases.append(['triangle', 'integral', None, True])
-test_cases.append(['apple', 'pabble', None, False])
-test_cases.append(['ahahahah', 'hahahaha', None, True])
-test_cases.append(['maybe, yes, likely, no!', 'no, likely, maybe...yes!', None, True])
-test_cases.append(['ana', 'AnA', True, False])  # caseSensitive
-test_cases.append(['ana', 'AnA', False, True])  # not caseSensitive
-
-
-correct = 0
-for test in test_cases:
-    ans = anagrams(s1=test[0], s2=test[1], case_sensitive=test[2])
-    if ans == test[3]:
-        correct += 1
-    else:
-        print('Wrong answer for \'%s\' and \'%s\': %s' % (test[0], test[1], 'yes' if ans else 'no'))
-print('Correct/Total: %d/%d' % (correct, len(test_cases)))
-
-print('Took %fs' % (time.time() - stime))
-
-##########################################################################
-# Follow up 2: each word of str2 should be anagram of at least one of the
-# words of str1.
-# Assumption1: words are separated by whitespace(s), \n, \t
-# Assumption2: if one of the sentences is empty string, the alg.returns false
-# Assumption3: if the second sentence has no alphanum characters, returns True
-
-
-def sentence_anagrams(s1, s2, case_sensitive=True):
-    if 0 in [len(s1), len(s2)]:
-        return False
-
+def anagrams_memory(s1, s2, case_sensitive=True, empty_strings_anagrams=True):
+    """
+    Determines if two input strings are anagrams. Two words are anagrams, if they consist of the same letters and 
+    numbers, irrespective of their order or extra non alphanumeric characters.
+    Note: The implementation uses one dictionary.
+    :param s1: [string] 
+    :param s2: [string]
+    :param case_sensitive: [bool, optional] case sensitive. Default: True
+    :param empty_strings_anagrams: [bool, optional] If True, two empty strings (or having only non alphanumeric 
+    characters) are considered anagrams. Default: True
+    :return: [bool]
+    """
     if not case_sensitive:
         s1 = s1.lower()
         s2 = s2.lower()
 
-    s1 = re.sub(r'[^\s\w]+', '', s1)
-    s2 = re.sub(r'[^\s\w]+', '', s2)
+    s1 = re.sub(r'\W+', '', s1)
+    s2 = re.sub(r'\W+', '', s2)
 
+    if len(s1) != len(s2):  # to avoid computation
+        return False
+    elif len(s1) == len(s2) == 0:
+        if empty_strings_anagrams:
+            return True
+        else:
+            return False
+
+    common_dict = letters_occurrences(s2, _dict=letters_occurrences(s1), inc=-1)
+
+    for _, value in common_dict.items():
+        if value != 0:
+            return False
+    return True
+
+
+def sentence_anagram_of(s1, s2, case_sensitive=True, empty_strings_anagrams=True):
+    """
+    Returns true if each word of the second sentence is an anagram-word of the first.
+    
+    Assumption: words are separated by whitespace(s), \n, \t
+    :param s1: [str]
+    :param s2: [str]
+    :param case_sensitive: [bool, optional] case sensitive. Default: True
+    :param empty_strings_anagrams: [bool, optional] If True, two empty strings (or having only non alphanumeric 
+    characters) are considered anagrams. Default: True
+    :return: [bool] 
+    """
     words1 = s1.split()
     words2 = s2.split()
-
-    if len(words2) == 0:
-        return True  # Assumption3
 
     for w2 in words2:
         found_anagram = False
         for w1 in words1:
-            if anagrams(w1, w2):
+            if anagrams(w1, w2, case_sensitive=case_sensitive,
+                        empty_strings_anagrams=empty_strings_anagrams):
                 found_anagram = True
                 break
         if not found_anagram:
             return False
     return True
 
-print('\nFollow up 2 ----------------------------------------------')
-s1, s2 = 'ana mile', 'mile'
-print(s1, '---', s2, '--->\t', sentence_anagrams(s1, s2))  # true
 
-s1, s2 = '', ''
-print(s1, '---', s2, '--->\t', sentence_anagrams(s1, s2))  # false
+def sentence_anagrams(s1, s2, case_sensitive=True, empty_strings_anagrams=True):
+    """
+    Returns true if each word of one of the input sentences is an anagram-word 
+    of at least one of the words of the other, and vice-versa.
 
-s1, s2 = 'aha', '!!!'
-print(s1, '---', s2, '--->\t', sentence_anagrams(s1, s2))  # true
+    Assumption: words are separated by whitespace(s), \n, \t
+    :param s1: [str]
+    :param s2: [str]
+    :param case_sensitive: [bool, optional] case sensitive. Default: True
+    :param empty_strings_anagrams: [bool, optional] If True, two empty strings (or having only non alphanumeric 
+    characters) are considered anagrams. Default: True
+    :return: [bool]
+    """
+    s1 = re.sub(r'[^\s\w]+', '', s1)
+    s2 = re.sub(r'[^\s\w]+', '', s2)
 
-s1, s2 = 'ana mile1 dada ', 'mile'
-print(s1, '---', s2, '--->\t', sentence_anagrams(s1, s2))  # false
+    if len(s1) != len(s2):  # to avoid computation
+        return False
+    elif len(s1) == len(s2) == 0:
+        if empty_strings_anagrams:
+            return True
+        else:
+            return False
 
-s1, s2 = 'ai mile', 'ai ml nn DNN'
-print(s1, '---', s2, '--->\t', sentence_anagrams(s1, s2))  # false
-
-s1, s2 = 'dnn ai 33 ml mile 33 AI NN', 'ai ml nn DNN 33'
-print(s1, '---', s2, '--->\t', sentence_anagrams(s1, s2))  # false (case sensitive)
-
-s1, s2 = 'dnn ai 33 ml mile 33 AI NN', 'ai ml nn DNN 33'
-print(s1, '---', s2, '--->\t', sentence_anagrams(s1, s2, case_sensitive=False))  # true (not case sensitive)
+    return sentence_anagram_of(s1, s2,
+                               case_sensitive=case_sensitive,
+                               empty_strings_anagrams=empty_strings_anagrams) and \
+           sentence_anagram_of(s2, s1,
+                               case_sensitive=case_sensitive,
+                               empty_strings_anagrams=empty_strings_anagrams)
