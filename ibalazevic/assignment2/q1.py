@@ -44,13 +44,13 @@ class BinaryTree:
             - key - int, the node for which we are printing
                     the ancestors.
             Returns: prints the ancestors. If a key is not
-                     present in the tree, prints None.
+                     present in the tree, it raises a ValueError.
         """
         ancestors = self.find_ancestors(self.root, key, [])
         if ancestors is not None:
             print ", ".join(map(str, ancestors))
         else:
-            print None
+            raise ValueError("Key not present in the binary tree.")
 
     def find_ancestors(self, node, key, ancestors):
         """
@@ -79,57 +79,29 @@ class BinaryTree:
 
 class BinaryTreeTest(unittest.TestCase):
 
-    def runTest(self):
-        self.test_root()
-        self.test_middle()
-        self.test_leaf()
-        self.test_missing_key()
+    def setUp(self):
+        self.tree = BinaryTree(7)
+        self.tree.insert_left(self.tree.root, 3)
+        self.tree.insert_right(self.tree.root, 4)
+        self.tree.insert_left(self.tree.root.left_child, 2)
+        self.tree.insert_right(self.tree.root.left_child, 5)
+        self.tree.insert_right(self.tree.root.right_child, 8)
+        self.tree.insert_left(self.tree.root.left_child.left_child, 1)
+        self.tree.insert_right(self.tree.root.left_child.left_child, 6)
    
 
     def test_root(self):
-        tree = BinaryTree(7)
-        tree.insert_left(tree.root, 3)
-        tree.insert_right(tree.root, 4)
-        tree.insert_left(tree.root.left_child, 2)
-        tree.insert_right(tree.root.left_child, 5)
-        tree.insert_right(tree.root.right_child, 8)
-        tree.insert_left(tree.root.left_child.left_child, 1)
-        tree.insert_right(tree.root.left_child.left_child, 6)
-        self.assertEqual(tree.find_ancestors(tree.root, 7, []), [])
+        self.assertEqual(self.tree.find_ancestors(self.tree.root, 7, []), [])
 
     def test_middle(self):
-        tree = BinaryTree(7)
-        tree.insert_left(tree.root, 3)
-        tree.insert_right(tree.root, 4)
-        tree.insert_left(tree.root.left_child, 2)
-        tree.insert_right(tree.root.left_child, 5)
-        tree.insert_right(tree.root.right_child, 8)
-        tree.insert_left(tree.root.left_child.left_child, 1)
-        tree.insert_right(tree.root.left_child.left_child, 6)
-        self.assertEqual(tree.find_ancestors(tree.root, 6, []), [7, 3, 2])
+        self.assertEqual(self.tree.find_ancestors(self.tree.root, 6, []), [7, 3, 2])
 
     def test_leaf(self):
-        tree = BinaryTree(7)
-        tree.insert_left(tree.root, 3)
-        tree.insert_right(tree.root, 4)
-        tree.insert_left(tree.root.left_child, 2)
-        tree.insert_right(tree.root.left_child, 5)
-        tree.insert_right(tree.root.right_child, 8)
-        tree.insert_left(tree.root.left_child.left_child, 1)
-        tree.insert_right(tree.root.left_child.left_child, 6)
-        self.assertEqual(tree.find_ancestors(tree.root, 8, []), [7, 4])
+        self.assertEqual(self.tree.find_ancestors(self.tree.root, 8, []), [7, 4])
 
     def test_missing_key(self):
-        tree = BinaryTree(7)
-        tree.insert_left(tree.root, 3)
-        tree.insert_right(tree.root, 4)
-        tree.insert_left(tree.root.left_child, 2)
-        tree.insert_right(tree.root.left_child, 5)
-        tree.insert_right(tree.root.right_child, 8)
-        tree.insert_left(tree.root.left_child.left_child, 1)
-        tree.insert_right(tree.root.left_child.left_child, 6)
-        self.assertEqual(tree.find_ancestors(tree.root, 10, []), None)
+        self.assertRaises(ValueError, self.tree.print_ancestors, 10)
 
 
-suite = unittest.TestLoader().loadTestsFromModule(BinaryTreeTest())
-unittest.TextTestRunner().run(suite)
+if __name__ == "__main__":
+    unittest.main()
