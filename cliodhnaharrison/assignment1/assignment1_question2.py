@@ -5,7 +5,7 @@ class Node:
     My node class for each node in the linked list.
     Each node has a value and a next node.
     """
-    def __init__(self, value, next=None):
+    def __init__(self, value=None, next=None):
         self.value = value
         self.next = next
 
@@ -24,18 +24,32 @@ class LinkedList:
     """
     My class for a singly linked list.
     Each list has a head.
-    Nodes can be inserted.
+    Nodes can be inserted by using the insert method after initialising a linked list.
     """
 
     def __init__(self, head=None):
+        """
+        Initialises an empty linked list object with head set to None and length set to 0.
+        """
         self.head = head
+        self.length = 0
 
     def insert(self, value):
+        """
+        Inserts a node into the linked listself.
+        Sets next node of new node to the head of the list.
+        Sets the new node to the head of the list.
+        Adds 1 to the length of the list.
+        """
         new_node = Node(value)
         new_node.set_next(self.head)
         self.head = new_node
+        self.length += 1
 
     def get_length(self):
+        """
+        Gets the length of the list.
+        """
         curr = self.head
         count = 0
         while curr:
@@ -44,6 +58,9 @@ class LinkedList:
         return count
 
     def find_kth_to_last(self, k):
+        """
+        Finds the kth to last element of the linked list.
+        """
         curr = self.head
         count = 0
         length = self.get_length()
