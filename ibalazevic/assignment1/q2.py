@@ -72,62 +72,33 @@ class LinkedList:
 
 class LinkedListTest(unittest.TestCase):
 
-    def runTest(self):
-        self.test_3rd_to_last()
-        self.test_last()
-        self.test_first()
-        self.test_empty()
-        self.test_negative_k()
-        self.test_k_equal_list_length()
-   
+    def setUp(self):
+        self.l = LinkedList()
+        self.l.append(2)
+        self.l.append(3)
+        self.l.append(8)
+        self.l.append(10)
+        self.l.append(1)
 
-    def test_3rd_to_last(self):
-        l = LinkedList()
-        l.append(2)
-        l.append(3)
-        l.append(8)
-        l.append(10)
-        l.append(1)
-        self.assertEqual(l.find_kth_to_last(3), 3)
+    def test_3rd_to_last(self):        
+        self.assertEqual(self.l.find_kth_to_last(3), 3)
 
     def test_last(self):
-        l = LinkedList()
-        l.append(2)
-        l.append(3)
-        l.append(8)
-        l.append(10)
-        l.append(1)
-        self.assertEqual(l.find_kth_to_last(0), 1)
+        self.assertEqual(self.l.find_kth_to_last(0), 1)
 
     def test_first(self):
         l = LinkedList()
-        l.append(2)
-        l.append(3)
-        l.append(8)
-        l.append(10)
-        l.append(1)
-        self.assertEqual(l.find_kth_to_last(4), 2)
+        self.assertEqual(self.l.find_kth_to_last(4), 2)
 
     def test_empty(self):
         l = LinkedList()
         self.assertEqual(l.find_kth_to_last(2), None)
 
     def test_negative_k(self):
-        l = LinkedList()
-        l.append(2)
-        l.append(3)
-        l.append(8)
-        self.assertEqual(l.find_kth_to_last(-2), None)
+        self.assertEqual(self.l.find_kth_to_last(-2), None)
 
     def test_k_equal_list_length(self):
-        l = LinkedList()
-        l.append(2)
-        l.append(3)
-        l.append(8)
-        self.assertEqual(l.find_kth_to_last(3), None)
+        self.assertEqual(self.l.find_kth_to_last(5), None)
 
-
-
-
-suite = unittest.TestLoader().loadTestsFromModule(LinkedListTest())
-unittest.TextTestRunner().run(suite)
+if __name__ == "__main__":
+    unittest.main()

@@ -23,13 +23,6 @@ def is_anagram(s1, s2, case_sensitive=True):
 
 class AnagramTest(unittest.TestCase):
 
-    def runTest(self):
-        self.test_case_sensitive1()
-        self.test_case_sensitive2()
-        self.test_case_empty()
-        self.test_case_insensitive1()
-        self.test_case_sensitive2()
-
     def test_case_sensitive1(self):
         self.assertTrue(is_anagram("Apple", "pAlpe"))
 
@@ -46,5 +39,5 @@ class AnagramTest(unittest.TestCase):
         self.assertFalse(is_anagram("applt", "palpe", case_sensitive=False))
 
 
-suite = unittest.TestLoader().loadTestsFromModule(AnagramTest())
-unittest.TextTestRunner().run(suite)
+if __name__ == "__main__":
+    unittest.main()
