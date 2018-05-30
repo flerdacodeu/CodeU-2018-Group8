@@ -6,16 +6,28 @@ class Node:
     Each node has a value and a next node.
     """
     def __init__(self, value=None, next=None):
+        """
+        Initialises a node with a value and a next node which is set to None.
+        """
         self.value = value
         self.next = next
 
     def get_node_value(self):
+        """
+        Returns the value of a node.
+        """
         return self.value
 
     def get_next_node(self):
+        """
+        Returns the next node.
+        """
         return self.next
 
     def set_next(self, new):
+        """
+        Sets next node of a node to new.
+        """
         self.next = new
 
 
