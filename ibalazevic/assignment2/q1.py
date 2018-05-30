@@ -38,43 +38,27 @@ class BinaryTree:
         """
         node.right_child = Node(data)
 
-    def print_ancestors(self, key):
+
+    def print_ancestors(self, node, key):
         """
         A method for printing all ancestors of a given key.
+            - node - Node, the root node of the tree.
             - key - int, the node for which we are printing
                     the ancestors.
             Returns: prints the ancestors. If a key is not
-                     present in the tree, it raises a ValueError.
-        """
-        ancestors = self.find_ancestors(self.root, key, [])
-        if ancestors is not None:
-            print ", ".join(map(str, ancestors))
-        else:
-            raise ValueError("Key not present in the binary tree.")
-
-    def find_ancestors(self, node, key, ancestors):
-        """
-        A recursive method for finding all ancestors of a 
-        given key.
-            - node - Node, the current node.
-            - key - int, the node for which we are printing
-                    the ancestors.
-            - ancestors - list, contains the list of all
-                          ancestors of the current node.
-            Returns: list, the list of ancestors.
+                     present in the tree, returns True,
+                     False otherwise.
         """
         if not node:
-            return
+            return False
         if node.data == key:
-            return ancestors
+            return True
 
-        ancestors.append(node.data)
-        if self.find_ancestors(node.left_child, key, ancestors) or\
-           self.find_ancestors(node.right_child, key, ancestors):
-           return ancestors
-        ancestors.pop()
-        return None
-
+        if self.print_ancestors(node.left_child, key) or\
+           self.print_ancestors(node.right_child, key):
+           print node.data
+           return True
+        return False
 
 
 class BinaryTreeTest(unittest.TestCase):
@@ -91,16 +75,17 @@ class BinaryTreeTest(unittest.TestCase):
    
 
     def test_root(self):
-        self.assertEqual(self.tree.find_ancestors(self.tree.root, 7, []), [])
+        self.assertEqual(self.tree.print_ancestors(self.tree.root, 7), True)
 
     def test_middle(self):
-        self.assertEqual(self.tree.find_ancestors(self.tree.root, 6, []), [7, 3, 2])
+        self.assertEqual(self.tree.print_ancestors(self.tree.root, 6), True)
 
     def test_leaf(self):
-        self.assertEqual(self.tree.find_ancestors(self.tree.root, 8, []), [7, 4])
+        self.assertEqual(self.tree.print_ancestors(self.tree.root, 8), True)
 
     def test_missing_key(self):
-        self.assertRaises(ValueError, self.tree.print_ancestors, 10)
+        self.assertEqual(self.tree.print_ancestors(self.tree.root, 10), False)
+
 
 
 if __name__ == "__main__":
