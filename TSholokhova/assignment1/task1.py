@@ -1,4 +1,4 @@
-def _normalize(string, case_sensitive=True, punctuation="none"):
+def _normalize(s, case_sensitive=True, punctuation="none"):
     """
     Normalize the string according to parameters case_sensitive and punctuation.
     :param string: initial string
@@ -12,12 +12,12 @@ def _normalize(string, case_sensitive=True, punctuation="none"):
     :return: normalized string
     """
     if not case_sensitive:
-        string = string.lower()
+        s = s.lower()
     if punctuation == "spaces":
-        string = ''.join([c if c.isalpha() else ' ' for c in string])
+        s = ''.join([c if c.isalpha() else ' ' for c in s])
     elif punctuation == "ignore":
-        string = ''.join([c for c in string if c.isalpha() or c == ' '])
-    return string
+        s = ''.join([c for c in s if c.isalpha() or c == ' '])
+    return s
 
 
 def sorted_letters(s):
