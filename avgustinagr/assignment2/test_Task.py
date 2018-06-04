@@ -8,6 +8,12 @@ class TestTask(unittest.TestCase):
         self.test_tree = Tree()
         for node in 5, 2, 7, 3, 6, 1, 0:
             self.test_tree.add(node)
+            """ Creates:
+                        5
+                    2      7
+                  1   3  6
+                0            
+            """
 
     def test_sent_anagrams(self):
         self.assertEqual(self.test_tree.print_path_to(4), None)
@@ -17,4 +23,5 @@ class TestTask(unittest.TestCase):
         self.assertEquals(self.test_tree.find_common_ancestor(5, 5), None)
         self.assertEquals(self.test_tree.find_common_ancestor(0, 1), 1)
         self.assertEquals(self.test_tree.find_common_ancestor(1, 3), 2)
+        self.assertEquals(self.test_tree.find_common_ancestor(1, 4), None)
 
