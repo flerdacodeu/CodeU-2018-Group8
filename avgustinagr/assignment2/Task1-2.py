@@ -56,29 +56,27 @@ class Tree:
     def find_path_from_to(self, ancestor, end, path, flag_print):
         """ Finds the path to a node from another one, which is its ancestor.
 
-        :param ancestor: value of ancestor node
-        :param end: value of end node
+        :param ancestor: object: ancestor node
+        :param end: object: end node
         :param path: a stack in which we store the path
         :param flag_print: flag, which determines whether we should print the reversed path or not
         :return: True if found, False if not
         """
-        path.append(ancestor)
+        path.append(ancestor.val)
 
-        if ancestor == end:
+        if ancestor.val == end.val:
             path.pop()
             if flag_print:
                 print path[::-1]
             return True
 
-        node = self.find(self.root, ancestor)
-
-        if node.left is not None:
-            if self.find_path_from_to(node.left.val, end, path, flag_print):
+        if ancestor.left is not None:
+            if self.find_path_from_to(ancestor.left, end, path, flag_print):
                 return True
             path.pop()
 
-        if node.right is not None:
-            if self.find_path_from_to(node.right.val, end, path, flag_print):
+        if ancestor.right is not None:
+            if self.find_path_from_to(ancestor.right, end, path, flag_print):
                 return True
             path.pop()
 
@@ -89,26 +87,45 @@ class Tree:
 
         :param end: value of the node
         """
+        end_node = self.find(self.root, end)
+        if end_node is None: 
+            return None
+        
         path = []
-        self.find_path_from_to(self.root.val, end, path, True)
+        self.find_path_from_to(self.root, end_node, path, True)
+
 
     def find_common_ancestor(self, node1, node2):
         """ Finds the first common ancestor of two nodes.
-        (If node1 is the parent of node2, returns the parent of node1)
+        (If node1 is the parent of node2, returns the value of node1)
 
-        :param node1: value of first node
-        :param node2: value of second node
-        :return: value of the first common ancestor
+        :param node1: object: first node
+        :param node2: object: second node
+        :return: value of the first common ancestor (or None if the given values don`t exist in the tree)
         """
         path1 = []
         path2 = []
-        self.find_path_from_to(self.root.val, node1, path1, False)
-        self.find_path_from_to(self.root.val, node2, path2, False)
+        _node1 = self.find(self.root, node1)
+        _node2 = self.find(self.root, node2)
 
-        for ancestor in range (min(len(path1),len(path2))):
+        if _node1 is None or _node2 is None: 
+            return None
+
+        self.find_path_from_to(self.root, _node1, path1, False)
+        self.find_path_from_to(self.root, _node2, path2, False)
+        print "path1 :", path1
+        print "path2: ", path2
+        
+        shorter_path = min(len(path1), len(path2))
+        
+        for ancestor in range (shorter_path):
             if path1[ancestor] != path2[ancestor]:
-                if ancestor == 0:
-                    return self.root.val
-                else:
                     return path1[ancestor-1]
-        return path1[ancestor]
+        
+        if shorter_path > 0:
+            if path1[shorter_path]:
+                return path1[shorter_path]
+            if path2[shorter_path]:
+                return path2[shorter_path]
+        return None
+
