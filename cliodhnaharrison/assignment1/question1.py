@@ -3,8 +3,8 @@
 import string
 
 #Input through command line
-string_one = input()
-string_two = input()
+#string_one = input()
+#string_two = input()
 
 def anagram_finder(string_one, string_two, case_sensitive=False):
     anagram = True
