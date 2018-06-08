@@ -18,6 +18,8 @@ class Node:
 class BinaryTree:
     """
     A class representing a binary tree.
+    The assupmtion is that the tree does not
+    contain duplicate keys.
         - root_data - content of the tree root.
     """
     def __init__(self, root_data):
@@ -39,6 +41,26 @@ class BinaryTree:
         """
         node.right_child = Node(data)  
 
+    def find_node(self, node, key):
+        """
+        A method that checks whether a key is present
+        in a binary tree.
+            - node - Node, the current node.
+            - key - the value of the Node to find.
+            Returns: True if the node is in the tree,
+                     False otherwise.
+        """
+        if not node:
+            return
+        if node.data == key:
+            return True
+
+        if not (self.find_node(node.left_child, key) or 
+                self.find_node(node.right_child, key)):
+            return False
+        return True
+
+
     def lowest_common_ancestor(self, key1, key2):
         """
         A method for finding the lowest common ancestor of
@@ -46,9 +68,15 @@ class BinaryTree:
             - key1 - value of first of the nodes.
             - key2 - value of second of the nodes.
             Returns: value of the lowest common
-                     ancestor node.
+                     ancestor node, raises ValueError if
+                     either one of the keys is not present
+                     in the tree.
         """
-        return self._lowest_common_ancestor_helper(self.root, key1, key2)
+        if not (self.find_node(self.root, key1) and
+                self.find_node(self.root, key2)):
+            raise ValueError("Key not present in the binary tree.")
+        else:
+            return self._lowest_common_ancestor_helper(self.root, key1, key2)
 
     def _lowest_common_ancestor_helper(self, node, key1, key2):
         """
@@ -101,6 +129,11 @@ class BinaryTreeTest(unittest.TestCase):
 
     def test_middle_both_sides(self):
         self.assertEqual(self.tree.lowest_common_ancestor(2, 4), 7)
+
+    def test_one_key_missing(self):
+        self.assertRaises(ValueError, self.tree.lowest_common_ancestor, 2, 11)
+    def test_both_keys_missing(self):
+        self.assertRaises(ValueError, self.tree.lowest_common_ancestor, 44, 11)
 
 
 if __name__ == "__main__":
