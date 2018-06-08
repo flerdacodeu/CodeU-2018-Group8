@@ -17,6 +17,8 @@ class Node:
 class BinaryTree:
     """
     A class representing a binary tree.
+    The assupmtion is that the tree does not
+    contain duplicate keys.
         - root_data - content of the tree root.
     """
     def __init__(self, root_data):
@@ -41,31 +43,42 @@ class BinaryTree:
     def print_ancestors(self, key):
         """
         A method for printing all ancestors of a given key.
+        Prints the ancestors. If a key is not present in 
+        the tree, raises a ValueError.
             - key - the node for which we are printing
                     the ancestors.
+            Returns: list of ancestors.
+           
         """
-        return self._print_ancestors_helper(self.root, key)
+        ancestors = self.find_ancestors(self.root, key, [])
+        if ancestors is not None:
+            print ", ".join(map(str, ancestors))
+            return ancestors
+        else:
+            raise ValueError("Key not present in the binary tree.")
 
-    def _print_ancestors_helper(self, node, key):
+    def find_ancestors(self, node, key, ancestors):
         """
         A helper method for printing all ancestors of a given key.
             - node - Node, the root node of the tree.
             - key - the node for which we are printing
                     the ancestors.
-            Returns: prints the ancestors. If a key is not
-                     present in the tree, returns True,
-                     False otherwise.
+            - ancestors - list, contains the list of all
+                          ancestors of the current node.
+            Returns: list of ancestors, None if the key isn't
+                     present in the tree.
         """
         if not node:
-            return False
+            return
         if node.data == key:
-            return True
+            return ancestors
 
-        if (self._print_ancestors_helper(node.left_child, key) or
-           self._print_ancestors_helper(node.right_child, key)):
-           print node.data
-           return True
-        return False
+        ancestors.append(node.data)
+        if (self.find_ancestors(node.left_child, key, ancestors) or
+           self.find_ancestors(node.right_child, key, ancestors)):
+           return ancestors
+        ancestors.pop()
+        return None
 
 
 class BinaryTreeTest(unittest.TestCase):
@@ -82,16 +95,16 @@ class BinaryTreeTest(unittest.TestCase):
    
 
     def test_root(self):
-        self.assertEqual(self.tree.print_ancestors(7), True)
+        self.assertEqual(self.tree.print_ancestors(7), [])
 
     def test_middle(self):
-        self.assertEqual(self.tree.print_ancestors(6), True)
+        self.assertEqual(self.tree.print_ancestors(6), [7, 3, 2])
 
     def test_leaf(self):
-        self.assertEqual(self.tree.print_ancestors(8), True)
+        self.assertEqual(self.tree.print_ancestors(8), [7, 4])
 
     def test_missing_key(self):
-        self.assertEqual(self.tree.print_ancestors(10), False)
+        self.assertRaises(ValueError, self.tree.print_ancestors, 10)
 
 
 
