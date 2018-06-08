@@ -3,7 +3,7 @@ import unittest
 class Node:
     """
     A class for a node of a binary tree.
-        - data - int, the content of a node.
+        - data - the content of a node.
         - left_child - Node, pointer to the left child 
                        of a current node.
         - right_child - Node, pointer to the right child 
@@ -17,7 +17,7 @@ class Node:
 class BinaryTree:
     """
     A class representing a binary tree.
-        - root_data - int, content of the tree root.
+        - root_data - content of the tree root.
     """
     def __init__(self, root_data):
         self.root = Node(root_data)
@@ -26,7 +26,7 @@ class BinaryTree:
         """
         A method for inserting a left child of a node.
             - node - Node, the current node.
-            - data - int, the data to insert to the left.
+            - data - the data to insert to the left.
         """
         node.left_child = Node(data)
 
@@ -34,16 +34,23 @@ class BinaryTree:
         """
         A method for inserting a right child of a node.
             - node - Node, the current node.
-            - data - int, the data to insert to the right.
+            - data - the data to insert to the right.
         """
         node.right_child = Node(data)
 
-
-    def print_ancestors(self, node, key):
+    def print_ancestors(self, key):
         """
         A method for printing all ancestors of a given key.
+            - key - the node for which we are printing
+                    the ancestors.
+        """
+        return self._print_ancestors_helper(self.root, key)
+
+    def _print_ancestors_helper(self, node, key):
+        """
+        A helper method for printing all ancestors of a given key.
             - node - Node, the root node of the tree.
-            - key - int, the node for which we are printing
+            - key - the node for which we are printing
                     the ancestors.
             Returns: prints the ancestors. If a key is not
                      present in the tree, returns True,
@@ -54,8 +61,8 @@ class BinaryTree:
         if node.data == key:
             return True
 
-        if self.print_ancestors(node.left_child, key) or\
-           self.print_ancestors(node.right_child, key):
+        if (self._print_ancestors_helper(node.left_child, key) or
+           self._print_ancestors_helper(node.right_child, key)):
            print node.data
            return True
         return False
@@ -75,16 +82,16 @@ class BinaryTreeTest(unittest.TestCase):
    
 
     def test_root(self):
-        self.assertEqual(self.tree.print_ancestors(self.tree.root, 7), True)
+        self.assertEqual(self.tree.print_ancestors(7), True)
 
     def test_middle(self):
-        self.assertEqual(self.tree.print_ancestors(self.tree.root, 6), True)
+        self.assertEqual(self.tree.print_ancestors(6), True)
 
     def test_leaf(self):
-        self.assertEqual(self.tree.print_ancestors(self.tree.root, 8), True)
+        self.assertEqual(self.tree.print_ancestors(8), True)
 
     def test_missing_key(self):
-        self.assertEqual(self.tree.print_ancestors(self.tree.root, 10), False)
+        self.assertEqual(self.tree.print_ancestors(10), False)
 
 
 
