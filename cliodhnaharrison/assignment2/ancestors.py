@@ -12,11 +12,10 @@ class Node:
         self.value = value
 
 
-def print_ancestors(root, key):
+def print_ancestors(root, key, ancestors=[]):
     """
     Recursive function to print all ancestors of a Node.
     """
-
     #Base Case
     if root == None:
         return False
@@ -24,13 +23,21 @@ def print_ancestors(root, key):
     if root.value == key:
         return True
 
-    if (print_ancestors(root.left, key) or print_ancestors(root.right, key)):
-        
+    if (print_ancestors(root.left, key, ancestors) or print_ancestors(root.right, key, ancestors)):
         #Prints ancestors when found
-        print (root.value)
-        return True
+        ancestors.append(root.value)
+        return ancestors
 
     return False
+
+def lowest_common_ancestors(self, node1, node2):
+    """
+    Function to find lowest common ancestor of two nodes.
+    """
+    return None
+
+
+
 
 root = Node(1)
 root.left = Node(2)
@@ -39,4 +46,4 @@ root.left.left = Node(4)
 root.left.right = Node(5)
 root.left.left.left = Node(7)
 
-print_ancestors(root, 7)
+print (print_ancestors(root, 7))
