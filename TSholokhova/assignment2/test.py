@@ -24,14 +24,14 @@ class TestBinaryTree(unittest.TestCase):
         bt = BinaryTree([1, 2, 3, 4, 5, 6, 7, 8])
         T = bt.root
         #root values
-        self.assertEqual(T.Anc, None)
+        self.assertEqual(T.anc, None)
         self.assertEqual(T.value, 1)
         #values of direct descendants
         self.assertEqual(T.L.value, 2)
         self.assertEqual(T.R.value, 3)
-        self.assertEqual(T.R.Anc.value, 1)
+        self.assertEqual(T.R.anc.value, 1)
         # other values
-        self.assertEqual(T.L.R.Anc.value, 2)
+        self.assertEqual(T.L.R.anc.value, 2)
         self.assertEqual(T.L.L.L.value, 8)
         self.assertEqual(T.L.L.R, None)
 
@@ -52,11 +52,11 @@ class TestBinaryTree(unittest.TestCase):
     def test_LCA(self):
         bt = BinaryTree([7, 3, 4, 2, 5, None, 8, 1, 6])
         T = bt.root
-        self.assertEqual(bt.LCA(T.L.R, T.L.L.R).value, 3)
-        self.assertEqual(bt.LCA(T.L.L, T.R.R).value, 7)
-        self.assertEqual(bt.LCA(T.R.R, T.R).value, 4)
-        self.assertEqual(bt.LCA(T.L.L.L, T.L).value, 3)
-        self.assertEqual(bt.LCA(T, T).value, 7)
+        self.assertEqual(bt.LCA_value(T.L.R, T.L.L.R), 3)
+        self.assertEqual(bt.LCA_value(T.L.L, T.R.R), 7)
+        self.assertEqual(bt.LCA_value(T.R.R, T.R), 4)
+        self.assertEqual(bt.LCA_value(T.L.L.L, T.L), 3)
+        self.assertEqual(bt.LCA_value(T, T), 7)
 
 
 if __name__ == '__main__':

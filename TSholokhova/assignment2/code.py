@@ -7,24 +7,46 @@ class Node():
         '''
         :param value: value of Node (default 0)
         :L, R: Nodes, descendants
-        :Anc: ancestor
+        :anc: ancestor
         '''
         self.value = value
         self.L = None
         self.R = None
-        self.Anc = None
+        self.anc = None
 
 
 class BinaryTree():
     '''
     Binary Tree.
     Each leaf has two None descendants, root have a None ancestor.
+    The class stores additional attributes for LCA requests.
+    _order: list of keys in traversal order.
+    _heights: list of heights in traversal order.
+    _first_meeting: dict stores first meeting in _order list for each key.
+    _rmq: Sparse Table for the _heights list.
     '''
-    def _build_tree(self, T, Anc, i, a=[]):
+    def __init__(self, a=[]):
+        '''
+        :param a: list (default [])
+            List with initial values which are contained in binary tree firstly.
+            a[0] is a root value
+            a[2*i+1], a[2*i+2] are values of i_th node's descendants, None is used for missing values
+        '''
+        self.root = self._build_tree(Node(), None, 0, a)
+        # BinaryTree attribute list of keys in traversal order
+        self._heights = []
+        # BinaryTree attribute list of heights in traversal order
+        self._order = []
+        # BinaryTree method computes _heights and _order
+        self._dfs(self.root, 0)
+        self._first_meeting = {self._order[i].value: i for i in range(len(self._order))}
+        self._rmq = SparseTable(self._heights)
+
+    def _build_tree(self, T, anc, i, a=[]):
         '''
         Recursive build binary tree function.
         :param T: current Node
-        :param Anc: ancestor of the current Node
+        :param anc: ancestor of the current Node
         :param i: index of current Node in the list
         :param a: list (default [])
             List with initial values
@@ -36,7 +58,7 @@ class BinaryTree():
         if i >= len(a) or a[i] is None:
             return None
         T.value = a[i]
-        T.Anc = Anc
+        T.anc = anc
         T.L = self._build_tree(Node(), T, 2*i+1, a) #left descendant
         T.R = self._build_tree(Node(), T, 2*i+2, a) #right descendant
         return T
@@ -49,24 +71,11 @@ class BinaryTree():
         :return:
         '''
         if T is None:
-            return [], []
+            return
         self._dfs(T.L, h+1)
         self._order.append(T)
         self._heights.append(h)
         self._dfs(T.R, h+1)
-
-    def __init__(self, a=[]):
-        '''
-        :param a: list (default [])
-            List with initial values which are contained in binary tree firstly.
-            a[0] is a root value
-            a[2*i+1], a[2*i+2] are values of i_th node's descendants, None is used for missing values
-        '''
-        self.root = self._build_tree(Node(), None, 0, a)
-        self._heights, self._order = [], []
-        self._dfs(self.root, 0)
-        self._first_meeting = {self._order[i].value: i for i in range(len(self._order))}
-        self._rmq = SparseTable(self._heights)
 
     def _find_ancestors(self, T):
         '''
@@ -76,7 +85,7 @@ class BinaryTree():
         '''
         if T is None:
             return []
-        return [T.value] + self._find_ancestors(T.Anc)
+        return [T.value] + self._find_ancestors(T.anc)
 
     def LCA(self, U, V):
         '''
@@ -90,9 +99,19 @@ class BinaryTree():
             return None
         i = self._first_meeting[U.value]
         j = self._first_meeting[V.value]
-        #print('i, j', i, j)
-        #print('min', self._rmq.get_min(min(i, j), max(i, j)))
         return self._order[self._rmq.get_min(min(i, j), max(i, j))]
+
+    def LCA_value(self, U, V):
+        '''
+        Find LCA of two Nodes
+        :param U, V: Nodes
+        :return: value of Node - least common ancestor of U and V
+        '''
+        if U is None:
+            return None
+        if V is None:
+            return None
+        return self.LCA(U, V).value
 
 class SparseTable():
     '''
