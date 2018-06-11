@@ -19,8 +19,8 @@ class Tree:
             self._add(val, self.root)
 
     def _add(self, val, node):
-        """ Adds a node to the tree as it would be added in a BST
-
+        """ Adds a node to the tree. Every added node keeps a Binary Search Tree structure.
+        
         :param val: val on the new node
         :param node: root of the tree
         """
@@ -108,7 +108,7 @@ class Tree:
             self.find_path_from_to(self.root, end_node, path, True)
 
     def _common_ancestor(self, root, _node1, _node2):
-        """ Helper function for get_common_ancestor(). (Implemented idea from the group session)
+        """ Helper function for get_common_ancestor(). (Implemented idea from the code review session)
         Takes additional parameter: root.
 
         :param root:  the root of the tree in which the function will be looking for _node1 / _node2
