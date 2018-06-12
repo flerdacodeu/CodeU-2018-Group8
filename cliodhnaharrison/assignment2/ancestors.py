@@ -15,6 +15,9 @@ class Node:
 def print_ancestors(root, key, ancestors=[]):
     """
     Recursive function to print all ancestors of a Node.
+    Initially passed a tree, a key of a node and an empty list.
+    Assumes nodes are not ancestors of themselves.
+    Assumes nodes are in the tree.
     """
     #Base Case
     if root == None:
@@ -24,7 +27,7 @@ def print_ancestors(root, key, ancestors=[]):
         return True
 
     if (print_ancestors(root.left, key, ancestors) or print_ancestors(root.right, key, ancestors)):
-        #Prints ancestors when found
+        #Adds ancestors to list when found
         ancestors.append(root.value)
         return ancestors
 
@@ -32,7 +35,9 @@ def print_ancestors(root, key, ancestors=[]):
 
 def lowest_common_ancestors(root, node1, node2):
     """
-    Function to find lowest common ancestor of two nodes.
+    Recursive function to find lowest common ancestor of two nodes.
+    Passed a tree and two nodes.
+    Assumes nodes are present in the tree.
     """
     if root == None:
         return None
@@ -48,15 +53,3 @@ def lowest_common_ancestors(root, node1, node2):
         return left_tree
     else:
         return right_tree
-
-
-
-
-root = Node(1)
-root.left = Node(2)
-root.right = Node(3)
-root.left.left = Node(4)
-root.left.right = Node(5)
-root.left.left.left = Node(7)
-
-print (lowest_common_ancestors(root, 7, 5))
