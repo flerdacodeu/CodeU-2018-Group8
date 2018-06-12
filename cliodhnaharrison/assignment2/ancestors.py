@@ -30,11 +30,24 @@ def print_ancestors(root, key, ancestors=[]):
 
     return False
 
-def lowest_common_ancestors(self, node1, node2):
+def lowest_common_ancestors(root, node1, node2):
     """
     Function to find lowest common ancestor of two nodes.
     """
-    return None
+    if root == None:
+        return None
+    elif (root.value == node1) or (root.value == node2):
+        return root.value
+
+    left_tree = lowest_common_ancestors(root.left, node1, node2)
+    right_tree = lowest_common_ancestors(root.right, node1, node2)
+
+    if left_tree and right_tree:
+        return root.value
+    elif left_tree:
+        return left_tree
+    else:
+        return right_tree
 
 
 
@@ -46,4 +59,4 @@ root.left.left = Node(4)
 root.left.right = Node(5)
 root.left.left.left = Node(7)
 
-print (print_ancestors(root, 7))
+print (lowest_common_ancestors(root, 7, 5))
