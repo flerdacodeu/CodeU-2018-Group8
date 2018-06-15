@@ -44,20 +44,20 @@ class BinaryTree:
         """
         A method for printing all ancestors of a given key.
         Prints the ancestors. If a key is not present in 
-        the tree, raises a ValueError.
+        the tree, raises a KeyError.
             - key - the node for which we are printing
                     the ancestors.
             Returns: list of ancestors.
            
         """
-        ancestors = self.find_ancestors(self.root, key, [])
+        ancestors = self._find_ancestors(self.root, key, [])
         if ancestors is not None:
             print ", ".join(map(str, ancestors))
             return ancestors
         else:
-            raise ValueError("Key not present in the binary tree.")
+            raise KeyError("Key not present in the binary tree.")
 
-    def find_ancestors(self, node, key, ancestors):
+    def _find_ancestors(self, node, key, ancestors):
         """
         A helper method for printing all ancestors of a given key.
             - node - Node, the root node of the tree.
@@ -74,8 +74,8 @@ class BinaryTree:
             return ancestors
 
         ancestors.append(node.data)
-        if (self.find_ancestors(node.left_child, key, ancestors) or
-           self.find_ancestors(node.right_child, key, ancestors)):
+        if (self._find_ancestors(node.left_child, key, ancestors) or
+           self._find_ancestors(node.right_child, key, ancestors)):
            return ancestors
         ancestors.pop()
         return None
@@ -104,7 +104,7 @@ class BinaryTreeTest(unittest.TestCase):
         self.assertEqual(self.tree.print_ancestors(8), [7, 4])
 
     def test_missing_key(self):
-        self.assertRaises(ValueError, self.tree.print_ancestors, 10)
+        self.assertRaises(KeyError, self.tree.print_ancestors, 10)
 
 
 

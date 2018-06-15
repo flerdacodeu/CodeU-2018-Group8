@@ -68,13 +68,13 @@ class BinaryTree:
             - key1 - value of first of the nodes.
             - key2 - value of second of the nodes.
             Returns: value of the lowest common
-                     ancestor node, raises ValueError if
+                     ancestor node, raises KeyError if
                      either one of the keys is not present
                      in the tree.
         """
         if not (self.find_node(self.root, key1) and
                 self.find_node(self.root, key2)):
-            raise ValueError("Key not present in the binary tree.")
+            raise KeyError("Key not present in the binary tree.")
         else:
             return self._lowest_common_ancestor_helper(self.root, key1, key2)
 
@@ -131,9 +131,9 @@ class BinaryTreeTest(unittest.TestCase):
         self.assertEqual(self.tree.lowest_common_ancestor(2, 4), 7)
 
     def test_one_key_missing(self):
-        self.assertRaises(ValueError, self.tree.lowest_common_ancestor, 2, 11)
+        self.assertRaises(KeyError, self.tree.lowest_common_ancestor, 2, 11)
     def test_both_keys_missing(self):
-        self.assertRaises(ValueError, self.tree.lowest_common_ancestor, 44, 11)
+        self.assertRaises(KeyError, self.tree.lowest_common_ancestor, 44, 11)
 
 
 if __name__ == "__main__":
