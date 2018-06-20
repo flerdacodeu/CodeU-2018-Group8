@@ -1,7 +1,5 @@
 dictionary = ["CAR", "CARD", "CART", "CAT"];
 grid = ["AAR", "TCD"]
-#dictionary = ["ATA"]
-#grid = ["AT"]
 found = []
 
 
