@@ -1,5 +1,7 @@
 dictionary = ["CAR", "CARD", "CART", "CAT"];
-grid = ["CCC","AAR", "TCD"]
+grid = ["AAR", "TCD"]
+#dictionary = ["ATA"]
+#grid = ["AT"]
 found = []
 
 
@@ -125,21 +127,19 @@ def find_words(x, y):
     :param x: row of the element
     :param y: column of the element
     """
+    if x > len(grid)-1 or x < 0 or y > len(grid[0]) or y < 0:
+        print "Element out of range"
+        return False
     path_tuples = []
     path = []
 
     return _find_word_from(x, y, path_tuples, path)
 
 
+def main():
+    for i in range(0, len(grid)):
+        for j in range(0, len(grid[0])):
+            find_words(i, j)
+
+
 all_neighbours = find_neighbours_of_all()
-
-for i in range(len(grid)):
-    for j in range(len(grid[0])):
-        find_words(i, j)
-
-for word in found:
-    print word
-
-
-
-
