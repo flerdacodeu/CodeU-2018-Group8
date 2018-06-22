@@ -145,7 +145,7 @@ class WordSearch:
             neighbours = self.find_valid_neighbours(self.grid, row, col)
 
             for r, c in neighbours:
-                if self.visited[row][col] == 0:
+                if self.visited[r][c] == 0:
                     self._recurse(word, r, c, dictionary)
 
         self.visited[row][col] = 0
