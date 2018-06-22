@@ -3,21 +3,6 @@
 #Assumes grid is uniform (same number of characters in each row/column)
 #Grid can be square or rectangular
 
-class WordSearch:
-
-    def __init__(self, grid):
-        """
-        Initialises word search grid and gets the number of rows and columns.
-
-        Arguments:
-            letters: A 2D array that represents the word search grid.
-        """
-
-        self.num_rows = len(grid)
-        self.num_cols = len(grid[0])
-        self.grid = grid
-
-
 class Dictionary:
 
     def __init__(self, words):
@@ -61,86 +46,113 @@ class Dictionary:
             True if word is present in dictionary, False if not
         """
 
-        return check_word in words
+        return check_word in self.words
 
+class WordSearch:
 
-def find_words(word_search, dictionary):
-    """
-    A function to find all valid words in a word search.
+    def __init__(self, grid):
+        """
+        Initialises word search grid and gets the number of rows and columns.
 
-    Arguments:
-        word_search: A WordSearch class as defined above on line 6.
-        dictionary: A Dictionary class as defined above on line 23.
-    """
+        Arguments:
+            letters: A 2D array that represents the word search grid.
+        """
 
-    results = []
+        self.num_rows = len(grid)
+        self.num_cols = len(grid[0])
+        self.grid = grid
+        self.visited = [[0 for x in range(self.num_cols)] for y in range(self.num_rows)]
 
-    for i in len(word_search.grid):
-        for j in word_search.grid[i]:
-            cont = True
-            check_string = word_search.grid[i][j]
-            while cont:
-                neighbours = find_valid_neighbours(word_search, i, j)
-                for cell_value in neighbours:
-                    new_string = check_string + cell_value
-                    if word_search.is_word(new_string):
-                        results.append(new_string)
-                    if word_search.is_prefix(new_string):
-                        #Recursion needs to come in here I think
-                        
+    def find_valid_neighbours(self, grid, row, col):
+        """
+        Function to find all existing adjacent cells to a certain cell.
 
+        Arguments:
+            grid: The grid containing the coordinates and the cells we are searching through.
+            row: The row that the cell we are looking from is in.
+            col: The column that the cell we are looking from is in.
 
+        Returns:
+            neighbours: A list of the coordinates of all existing adjacent cells to a given cell.
+        """
+        neighbours = []
 
-def find_valid_neighbours(grid, row, col):
-    """
-    Function to find all existing adjacent cells to a certain cell.
+        row_above = row-1 >= 0
+        row_below = row+1 < self.num_rows
+        col_behind = col-1 >= 0
+        col_ahead = col+1 < self.num_cols
 
-    Arguments:
-        grid: The grid containing the coordinates and the cells we are searching through.
-        row: The row that the cell we are looking from is in.
-        col: The column that the cell we are looking from is in.
+        if row_above:
+            neighbours.append((row-1, col))
+            if col_behind:
+                neighbours.append((row-1, col-1))
+            if col_ahead:
+                neighbours.append((row-1, col+1))
 
-    Returns:
-        neighbours: A list of the values in all existing adjacent cells to a given cell.
-    """
-    neighbours = []
+        if row_below:
+            neighbours.append((row+1, col))
+            if col_behind:
+                neighbours.append((row+1, col-1))
+            if col_ahead:
+                neighbours.append((row+1, col+1))
 
-    row_above = row-1 >= 0
-    row_below = row+1 < self.num_rows
-    col_behind = col-1 >= 0
-    col_ahead = col+1 < self.num_cols
-
-    if row_above:
-        neighbours.append(grid[row-1][col])
-        if col_behind:
-            neighbours.append(grid[row-1][col-1])
         if col_ahead:
-            neighbours.append(grid[row-1][col+1])
+            neighbours.append((row, col+1))
 
-    if row_below:
-        neighbours.append(grid[row+1][col])
         if col_behind:
-            neighbours.append(grid[row+1][col-1])
-        if col_ahead:
-            neighbours.append(grid[row+1][col+1])
+            neighbours.append((row, col-1))
 
-    if col_ahead:
-        neighbours.append(grid[row][col+1])
-
-    if col_behind:
-        neighbours.append(grid[row][col-1])
-
-    return neighbours
+        return neighbours
 
 
 
+    def find_words(self, dictionary):
+        """
+        A function to find all valid words in a word search.
+
+        Arguments:
+            dictionary: A Dictionary class as defined above on line 23.
+
+        Returns:
+            results: A set of words from the dictionary found in the word search.
+        """
+
+        self.results = set()
+
+        for row in range(0, self.num_rows):
+            for col in range(0, self.num_cols):
+                self._recurse("", row, col, dictionary)
+        return self.results
+
+
+
+    def _recurse(self, word, row, col, dictionary):
+        """
+        Recurses through neighbours of row, col if the given word is a valid prefix of a word in the dictionary.
+
+        Arguments:
+            word: A string of characters from the word search that may be a word from the dictionary.
+            row: An int that represents the row of the 2D array that the cell is located.
+            col: An int that represents the column of the 2D array that the cell is located.
+        """
+        self.visited[row][col] = 1
+        word += self.grid[row][col]
+
+        if dictionary.is_word(word):
+            self.results.add(word)
+
+        if dictionary.is_prefix(word):
+            neighbours = self.find_valid_neighbours(self.grid, row, col)
+
+            for r, c in neighbours:
+                if self.visited[row][col] == 0:
+                    self._recurse(word, r, c, dictionary)
+
+        self.visited[row][col] = 0
 
 
 
 
-
-
-
-
-test_word_search = WordSearch("AARTCD", 2, 3)
-print (test_word_search.grid)
+test_word_search = WordSearch([["A", "A", "R"], ["T", "C", "D"]])
+test_dictionary = Dictionary(["CAR", "CARD", "CART", "CAT"])
+print (test_word_search.find_words(test_dictionary))
