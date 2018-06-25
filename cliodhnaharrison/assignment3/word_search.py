@@ -149,10 +149,3 @@ class WordSearch:
                     self._recurse(word, r, c, dictionary)
 
         self.visited[row][col] = 0
-
-
-
-
-test_word_search = WordSearch([["A", "A", "R"], ["T", "C", "D"]])
-test_dictionary = Dictionary(["CAR", "CARD", "CART", "CAT"])
-print (test_word_search.find_words(test_dictionary))
