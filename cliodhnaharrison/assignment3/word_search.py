@@ -27,10 +27,8 @@ class Dictionary:
             True if prefix is valid, False if not
         """
 
-        length = len(check_prefix)
-
         for word in self.words:
-            if word[0:length] == check_prefix:
+            if word.startswith(check_prefix, 0):
                 return True
         return False
 
@@ -119,8 +117,8 @@ class WordSearch:
 
         self.results = set()
 
-        for row in range(0, self.num_rows):
-            for col in range(0, self.num_cols):
+        for row in range(self.num_rows):
+            for col in range(self.num_cols):
                 self._recurse("", row, col, dictionary)
         return self.results
 
