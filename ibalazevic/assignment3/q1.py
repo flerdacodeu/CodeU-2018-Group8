@@ -65,7 +65,7 @@ def _search_words(grid, prefix_dict, pos, shifts, curr_word,
                     _search_words(grid, prefix_dict, (pos[0]+shift[0], pos[1]+shift[1]), 
                                   shifts, curr_word, valid_words, visited_positions, word_list)
                 visited_positions.remove(pos)
-            if not prefix_dict[curr_word] or prefix_dict[curr_word] == set(["END"]):
+            if prefix_dict[curr_word] == set([]) or prefix_dict[curr_word] == set(["END"]):
                 del prefix_dict[curr_word]
                 prefix_dict[curr_word[:-1]].remove(curr_word[-1])
             word_list.pop()
