@@ -70,8 +70,7 @@ class TestsWordSearch(unittest.TestCase):
         grid_chars = [['a', 'a', 'r'], ['t', 'c', 'd']]
         simpleDictionary = MySimpleDictionary(['car', 'card', 'cart', 'cat'])
         groundTruthDict = set(['cat', 'car', 'card'])
-        self.assertEqual(len(wordSearch(grid_chars, simpleDictionary) & groundTruthDict),
-                         len(groundTruthDict))
+        self.assertEqual(wordSearch(grid_chars, simpleDictionary), groundTruthDict)
 
     def testExample(self):
         grid_chars = [['w', 'm', 'l'],
@@ -82,8 +81,7 @@ class TestsWordSearch(unittest.TestCase):
                                'wi', 'kc', 'ai', 'la', 'ma', 'ml', 'cam', 'k', 'lek', 'ie', 'li', 'mac', 'ci', 'ka',
                                'mi', 'a', 'make', 'w', 'l', 'al', 'ki', 'le', 'm', 'lei', 'il', 'lac', 'cim', 'elk',
                                'cia', 'lm', 'elm', 'ic', 'ak', 'ali', 'mack', 'ac', 'ail', 'lie', 'am', 'e', 'ilk'])
-        self.assertEqual(len(wordSearch(grid_chars, Dictionary) & groundTruthDict),
-                         len(groundTruthDict))
+        self.assertEqual(wordSearch(grid_chars, Dictionary), groundTruthDict)
 
 
 if __name__ == '__main__':
