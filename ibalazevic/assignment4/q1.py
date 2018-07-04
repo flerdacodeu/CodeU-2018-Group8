@@ -22,7 +22,6 @@ def count_islands(nrows, ncols, grid):
             if grid[pos[0]][pos[1]]:
                 _find_islands(nrows, ncols, grid, pos, 
                               curr_island, islands)
-            if curr_island:
                 islands.append(curr_island)
     return len(islands)
     
