@@ -27,8 +27,7 @@ class Grid():
             x_new = x0 + dx[i]
             y_new = y0 + dy[i]
             if 0 <= x_new < self.rows and 0 <= y_new < self.cols:
-                adjacent_cells.append({'coords': (x_new, y_new), 'letter': self.grid[x_new][y_new]})
-        return adjacent_cells
+                yield {'coords': (x_new, y_new), 'letter': self.grid[x_new][y_new]}
 
     def get_letter(self, x0, y0):
         """
@@ -62,13 +61,15 @@ class Dictionary():
         When use_cache is True methods is_word and is_prefix should not receive a string.
             Results of these methods depends only on cache_root.
             It is necessary use navigation cash methods: init, add, del.
+            The main benefit of cache method that methods is_prefix and is_word work O(1),
+            but previously necessary add their letters to the cache.
+            If cache method uses for trie traversal it has O(n) asymptotics (
+            where n - number of vertices in a trie), not O(sum(len(words))) asymptotics.
         """
         self.root = dict()
         self.use_cache = use_cache
         if self.use_cache:
             self.init_cache()
-        if not words:
-            return
         for word in words:
             current_root = self.root
             for letter in word:
