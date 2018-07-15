@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
+from copy import deepcopy
 
+#main problem
 def build_graph(dictionary):
     """
     Builds a directed graph of characters from a 
@@ -19,28 +21,14 @@ def build_graph(dictionary):
             characters that have outgoing edges
             from the current character)
     """
-    level = 0
-    graph = {}
-    change = True
-
-    while(change):
-        change = False
-        curr_letter = ""
-        curr_prefix = ""
-        for word in dictionary:
-            if level < len(word):
-                change = True
-                if word[level] not in graph:
-                    graph[word[level]] = {"outgoing":set(), "incoming":set()}
-                if word[level] != curr_letter and word[:level] == curr_prefix:
-                    if curr_letter:
-                        if curr_letter not in graph:
-                            graph[curr_letter] = {"outgoing":set(), "incoming":set()}
-                        graph[curr_letter]["outgoing"].add(word[level])
-                        graph[word[level]]["incoming"].add(curr_letter)
-                curr_letter = word[level]
-                curr_prefix = word[:level]
-        level += 1
+    characters = {character for word in dictionary for character in word}
+    graph = {char : {"outgoing":set(), "incoming":set()} for char in characters}
+    for i in range(0, len(dictionary) - 1):
+        for c1, c2 in zip(dictionary[i], dictionary[i+1]):
+            if c1 != c2:
+                graph[c1]["outgoing"].add(c2)
+                graph[c2]["incoming"].add(c1)
+                break
     return graph
 
 def unknown_alphabet(dictionary):
@@ -53,7 +41,6 @@ def unknown_alphabet(dictionary):
             - alphabet: list of strings, an ordered
                         list of characters
     """
-    dictionary = map(lambda x: x.decode("utf8"), dictionary)
     graph = build_graph(dictionary)
     starting_nodes = [node for node, edges in graph.items() if not edges["incoming"]]
 
@@ -72,6 +59,39 @@ def unknown_alphabet(dictionary):
     return alphabet
 
 
+#challenge1
+def all_alphabets(dictionary):
+    """
+        Extracts all possible alphabets (ordered list of characters)
+        from a lexicographically ordered dictionary of words.
+            - dictionary: list of strings, all the
+                          words in the dictionary
+            Returns:
+                - all_alphabets: list of ordered alphabets list of strings
+        """
+    def _brute_force(starting_nodes, graph):
+        for curr_node in starting_nodes:
+            tmp_graph = deepcopy(graph)
+            tmp_starting_nodes = starting_nodes.copy()
+            tmp_starting_nodes.remove(curr_node)
+            alphabet.append(curr_node)
+            for node in tmp_graph[curr_node]["outgoing"].copy():
+                tmp_graph[curr_node]["outgoing"].remove(node)
+                tmp_graph[node]["incoming"].remove(curr_node)
+                if not tmp_graph[node]["incoming"]:
+                    tmp_starting_nodes.append(node)
+            yield from _brute_force(tmp_starting_nodes, tmp_graph)
+            alphabet.pop()
+        if not starting_nodes:
+            yield alphabet.copy()
+            for node in graph:
+                if graph[node]["incoming"] or graph[node]["outgoing"]:
+                    raise ValueError("Dictionary is inconsistent!")
+
+    graph = build_graph(dictionary)
+    starting_nodes = [node for node, edges in graph.items() if not edges["incoming"]]
+    alphabet = []
+    return list(_brute_force(starting_nodes, graph))
 
 class AlphabetTest(unittest.TestCase):
 
@@ -82,21 +102,32 @@ class AlphabetTest(unittest.TestCase):
         self.assertEqual(unknown_alphabet([""]), [])
 
     def test_one_word(self):
-        self.assertEqual(unknown_alphabet(["abc"]), ["b", "c", "a"])
+        self.assertTrue(tuple(unknown_alphabet(["abc"])) in {tuple("abc"),
+                                                             tuple("acb"),
+                                                             tuple("bac"),
+                                                             tuple("bca"),
+                                                             tuple("cab"),
+                                                             tuple("cba"),
+                                                             })
 
     def test_base_example(self):
-        self.assertEqual(unknown_alphabet(["art", "rat", "cat", "car"]), ["t", "a", "r", "c"])
+        self.assertTrue(tuple(unknown_alphabet(["art", "rat", "cat", "car"])) in
+                        {tuple("tarc"), tuple("atrc")})
 
     def test_more_complicated_example(self):
-        self.assertEqual(unknown_alphabet(["alp", "art", "arm", "rat", "cat", "car"]),
-                                           ["t", "m", "p", "l", "a", "r", "c"])
+        self.assertTrue(unknown_alphabet(["alp", "art", "arm", "rat", "cat", "car"]) in
+                         all_alphabets(["alp", "art", "arm", "rat", "cat", "car"]))
 
     def test_cycle_raises_valueerror(self):
         self.assertRaises(ValueError, unknown_alphabet, ["art", "rat", "cat", "car", "rr", "ra"])
 
     def test_nonascii_chars(self):
-        self.assertEqual(unknown_alphabet(["älp", "ärt", "ärm", "rat", "cat", "car"]),
-                    map(lambda x: x.decode("utf8"), ["t", "m", "p", "l", "ä", "r", "c", "a"]))
+        self.assertCountEqual(unknown_alphabet(["älp", "ärt", "ärm", "rat", "cat", "car"]),
+                    map(lambda x: x, ["t", "m", "p", "l", "ä", "r", "c", "a"]))
+
+class AllAlphabetTest(unittest.TestCase):
+    def test_all_alphabets_base(self):
+        self.assertCountEqual(all_alphabets(["art", "rat", "cat", "car"]), [list('atrc'), list('tarc')])
 
 if __name__ == "__main__":
     unittest.main()
