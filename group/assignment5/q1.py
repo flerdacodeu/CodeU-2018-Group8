@@ -72,7 +72,7 @@ def all_alphabets(dictionary):
     def _brute_force(starting_nodes, graph):
         for curr_node in starting_nodes:
             tmp_graph = deepcopy(graph)
-            tmp_starting_nodes = deepcopy(starting_nodes)
+            tmp_starting_nodes = starting_nodes.copy()
             tmp_starting_nodes.remove(curr_node)
             alphabet.append(curr_node)
             for node in tmp_graph[curr_node]["outgoing"].copy():
@@ -83,7 +83,7 @@ def all_alphabets(dictionary):
             yield from _brute_force(tmp_starting_nodes, tmp_graph)
             alphabet.pop()
         if not starting_nodes:
-            yield deepcopy(alphabet)
+            yield alphabet.copy()
             for node in graph:
                 if graph[node]["incoming"] or graph[node]["outgoing"]:
                     raise ValueError("Dictionary is inconsistent!")
