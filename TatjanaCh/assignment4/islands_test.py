@@ -1,6 +1,6 @@
 # Python 3
 import unittest
-from islands import *
+from islands import Islands
 
 
 class TestIslands(unittest.TestCase):

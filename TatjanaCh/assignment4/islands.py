@@ -1,23 +1,5 @@
 # Python 3
-
-
-def neighbors(x, y, width):
-    """
-    Checks if x and y are neighbors in a grid of given width.
-    Two positions x and y are neighbors if they are adjacent horizontally 
-    or vertically, but not diagonally.
-    :param x: [int] position identifier
-    :param y: [int] position identifier
-    :param width: [int] width of the grid
-    :return: [bool] True if x and y are neighbours, False otherwise
-    """
-    if min([x, y, width]) < 0:
-        raise ValueError
-    if (x % width == y % width and abs(x-y) == width) or \
-            (x // width == y // width and abs(x-y) == 1):
-        return True
-    else:
-        return False
+from utils import neighbors
 
 
 class Islands:
@@ -26,10 +8,20 @@ class Islands:
     as well as methods which identify the number of such sets called islands.
     Two unique integers which identify a position of a 2D grid belong to the same 
     island if they are neighbors (see docstring of the above function neighbors).
+    
+    :attribute setList: [list of sets] list sets, where each set contains position identifiers (integers)
+    :attribute width: [int] width of the grid
+    :attribute height: [int] height of the grid
     """
     def __init__(self, width, height):
         self.setList = []
         self.width = width
+        self.height = height
+
+    def set_width(self, width):
+        self.width = width
+
+    def set_height(self, height):
         self.height = height
 
     def __add__(self, x):
@@ -42,7 +34,7 @@ class Islands:
         """
         x_neighbors = []
         for s, S in enumerate(self.setList):
-            if any([neighbors(x, y, self.width) for y in S]):
+            if any([neighbors(x, y, self.width, self.height) for y in S]):
                 x_neighbors.append(s)
         if len(x_neighbors) < 1:
             self.setList.append(set([x]))
@@ -64,7 +56,8 @@ class Islands:
         """
         if len(grid) == 0:
             return
-        self.__init__(height=len(grid), width=len(grid[0]))
+        self.set_width(len(grid))
+        self.set_height(len(grid[0]))
         for i in range(self.height):
             for j in range(self.width):
                 if grid[i][j]:
