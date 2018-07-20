@@ -22,7 +22,7 @@ def count_islands(maps):
     return num_islands
 
 
-def neighbours(maps, row, col):
+def _neighbours(nrows, ncols, row, col):
     """
     Returns the valid neighbours around a cell of position (row, col).
 
@@ -37,9 +37,9 @@ def neighbours(maps, row, col):
     coords = []
 
     row_above = row - 1 >= 0
-    row_below = row + 1 < len(maps)
+    row_below = row + 1 < nrows
     col_behind = col - 1 >= 0
-    col_ahead = col + 1 < len(maps[0])
+    col_ahead = col + 1 < ncols
 
     if row_above:
         coords.append((row - 1, col))
@@ -54,7 +54,7 @@ def neighbours(maps, row, col):
 
 
 
-def find_land(maps, row, col):
+def _find_land(maps, row, col):
     """
     Breadth first search function to find all land connected to a cell and mark it as visited by changing True to False in the map.
 
@@ -70,6 +70,6 @@ def find_land(maps, row, col):
 
         #Set Land tile in map to Water tile to mark it as visited
         maps[curr_x][curr_y] = False
-        for new_x, new_y in neighbours(maps, curr_x, curr_y):
+        for new_x, new_y in neighbours(len(maps), len(maps[0]), curr_x, curr_y):
             if maps[new_x][new_y]:
                 deck.append((new_x, new_y))
