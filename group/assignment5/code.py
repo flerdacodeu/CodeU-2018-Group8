@@ -10,32 +10,6 @@ Challenge #1: returns all possible alphabets.
 
 
 # main problem
-def _build_graph(dictionary: List[str]) -> Dict[str, Dict[str, Set[str]]]:
-    """Builds a directed graph of characters from a dictionary of words.
-
-    For example, if the letter "k" precedes the letter "b" in the dictionary,
-    the graph will contain a directed edge k->b.
-
-    Args:
-        dictionary: A lexicographically ordered list of all words in a language.
-
-    Returns: A dictionary with two values, "incoming" (contains all the chars
-        that have incoming edges to the current character) and "outgoing"
-        (contains all the characters that have outgoing edges from the current
-        character).
-    """
-    characters = {character for word in dictionary for character in word}
-    graph = {char: {"outgoing": set(), "incoming": set()}
-             for char in characters}
-    for i in range(0, len(dictionary) - 1):
-        for c1, c2 in zip(dictionary[i], dictionary[i + 1]):
-            if c1 != c2:
-                graph[c1]["outgoing"].add(c2)
-                graph[c2]["incoming"].add(c1)
-                break
-    return graph
-
-
 def get_alphabet(dictionary: List[str]) -> List[str]:
     """Extracts an alphabet from a given dictionary of words.
 
@@ -121,3 +95,29 @@ def get_all_alphabets(dictionary: List[str]) -> List[List[str]]:
     main_starting_nodes = [node for node, edges in main_graph.items()
                            if not edges["incoming"]]
     return list(_brute_force(main_starting_nodes, main_graph, []))
+
+
+def _build_graph(dictionary: List[str]) -> Dict[str, Dict[str, Set[str]]]:
+    """Builds a directed graph of characters from a dictionary of words.
+
+    For example, if the letter "k" precedes the letter "b" in the dictionary,
+    the graph will contain a directed edge k->b.
+
+    Args:
+        dictionary: A lexicographically ordered list of all words in a language.
+
+    Returns: A dictionary with two values, "incoming" (contains all the chars
+        that have incoming edges to the current character) and "outgoing"
+        (contains all the characters that have outgoing edges from the current
+        character).
+    """
+    characters = {character for word in dictionary for character in word}
+    graph = {char: {"outgoing": set(), "incoming": set()}
+             for char in characters}
+    for i in range(0, len(dictionary) - 1):
+        for c1, c2 in zip(dictionary[i], dictionary[i + 1]):
+            if c1 != c2:
+                graph[c1]["outgoing"].add(c2)
+                graph[c2]["incoming"].add(c1)
+                break
+    return graph
