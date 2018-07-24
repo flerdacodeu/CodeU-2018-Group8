@@ -4,40 +4,33 @@ from code import get_alphabet, get_all_alphabets
 
 
 class AlphabetTest(unittest.TestCase):
-
     def test_get_alphabet_empty(self):
         self.assertEqual(get_alphabet([]), [])
 
     def test_get_alphabet_one_empty_word(self):
-        self.assertEqual(get_alphabet([""]), [])
+        self.assertEqual(get_alphabet(['']), [])
 
     def test_get_alphabet_all_empty_words(self):
-        self.assertEqual(get_alphabet(["", "", ""]), [])
+        self.assertEqual(get_alphabet(['', '', '']), [])
 
     def test_get_alphabet_some_empty_words(self):
-        self.assertEqual(get_alphabet(["", "", "A"]), ["A"])
+        self.assertEqual(get_alphabet(['', '', 'A']), ['A'])
 
     def test_get_alphabet_one_word(self):
-        self.assertIn(tuple(get_alphabet(["abc"])),
-                      {tuple("abc"), tuple("acb"), tuple("bac"),
-                       tuple("bca"), tuple("cab"), tuple("cba")})
+        self.assertRegexpMatches(''.join(get_alphabet(["abc"])), r'^(?:([abc])(?!.*\1)){3}$')
 
     def test_get_alphabet_simple(self):
-        self.assertIn(tuple(get_alphabet(["art", "rat", "cat", "car"])),
-                      {tuple("tarc"), tuple("atrc")})
+        self.assertRegexpMatches(''.join(get_alphabet(["art", "rat", "cat", "car"])), r'^(?:([ta])(?!.*\1)){2}rc$')
 
     def test_get_alphabet_cycle_raises_value_error(self):
         self.assertRaises(ValueError, get_alphabet,
                           ["art", "rat", "cat", "car", "rr", "ra"])
 
     def test_get_alphabet_identical_words(self):
-        self.assertIn(tuple(get_alphabet(["ART", "ART", "ART"])),
-                      {tuple("ART"), tuple("ATR"), tuple("RAT"),
-                       tuple("RTA"), tuple("TAR"), tuple("TRA")})
+        self.assertRegexpMatches(''.join(get_alphabet(['ART', 'ART', 'ART'])), r'^(?:([ART])(?!.*\1)){3}$')
 
     def test_alphabet_functions_any_character(self):
-        self.assertIn(tuple(get_alphabet(["äl", "är", "lä", "🐨"])),
-                      {tuple("älr🐨"), tuple("äl🐨r")})
+        self.assertRegexpMatches(''.join(get_alphabet(["äl", "är", "lä", "🐨"])), r'^äl(?:([🐨r])(?!.*\1)){2}$')
 
 
 class AllAlphabetsTest(unittest.TestCase):
