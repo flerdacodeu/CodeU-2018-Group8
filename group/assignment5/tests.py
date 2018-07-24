@@ -1,5 +1,7 @@
 import unittest
-from code import get_alphabet
+
+from code import get_alphabet, get_all_alphabets
+
 
 class AlphabetTest(unittest.TestCase):
 
@@ -37,6 +39,7 @@ class AlphabetTest(unittest.TestCase):
         self.assertTrue(tuple(get_alphabet(["äl", "är", "lä", "🐨"])) in
                         {tuple("älr🐨"), tuple("äl🐨r")})
 
+
 class AllAlphabetsTest(unittest.TestCase):
 
     def test_get_all_alphabets_empty(self):
@@ -70,12 +73,14 @@ class AllAlphabetsTest(unittest.TestCase):
                                list('RTA'), list('TAR'), list('TRA')])
 
     def test_alphabet_functions_complicated(self):
-        self.assertTrue(get_alphabet(["alp", "art", "arm", "rat", "cat", "car"]) in
-                        get_all_alphabets(["alp", "art", "arm", "rat", "cat", "car"]))
+        self.assertTrue(
+            get_alphabet(["alp", "art", "arm", "rat", "cat", "car"]) in
+            get_all_alphabets(["alp", "art", "arm", "rat", "cat", "car"]))
 
     def test_alphabet_functions_any_character(self):
-        self.assertTrue(get_alphabet(["älp", "ärt", "ärm", "rat", "cat", "car"]) in
-                        get_all_alphabets(["älp", "ärt", "ärm", "rat", "cat", "car"]))
+        self.assertTrue(
+            get_alphabet(["älp", "ärt", "ärm", "rat", "cat", "car"]) in
+            get_all_alphabets(["älp", "ärt", "ärm", "rat", "cat", "car"]))
 
 
 if __name__ == "__main__":
