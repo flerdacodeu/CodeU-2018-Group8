@@ -66,7 +66,7 @@ class AllAlphabetsTest(unittest.TestCase):
                                list("RTA"), list("TAR"), list("TRA")])
 
     def test_alphabet_functions_complicated(self):
-        self.assertTrue(
+        self.assertIn(
             get_alphabet(["alp", "art", "arm", "rat", "cat", "car"]),
             get_all_alphabets(["alp", "art", "arm", "rat", "cat", "car"]))
 
