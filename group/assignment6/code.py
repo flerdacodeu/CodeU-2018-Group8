@@ -4,52 +4,54 @@ logging.basicConfig(filename="code.log", filemode='w', level=logging.DEBUG)
 
 """Computes sequence of moves from the start state to the end state.
 
-Data structure to represent start and end states:
+Data structure which represents start and end states:
     For each state it stores two lists: state and inverse_state;
-    state: stores number of cars for each place, 
-    the empty slot is represented as 0;
-    inverse_state: stores number of parking place for each car.
+    state: stores number of cars for each place, the empty slot is represented as 0;
+    inverse_state: stores number of the parking place for each car.
     
-    It stores 3 types of states: start state,
+    It stores 3 types of states: start state, 
     end state and current state (after some moves).
     
-    Also it stores set of car that are on wrong places.
+    Also it stores set of cars that are parked on wrong places.
 
 Fewer moves:
-    We can't decrease count of incorrect cars by more than 1 for one movement.
+    We can't decrease the count of incorrectly parked cars by more 
+    than 1 for one movement.
     If initially the empty slot is on the right place we can't decrease
     count of incorrect cars, so we shouldn't increase it 
     (we can move any incorrect car to empty place).
     If the empty slot is not on the right place we can decrease 
     count of incorrect cars by 1 (we can move correct car to empty place).
-    Empty slot will be on it's right place the number of cycles times.
+    Number of times when empty slot will be on its right place equals 
+    to the number of cycles in the permutation.
     So, minimal count of movements = SUM (l_i + 1), where i from 1 to N, 
-    N is count of permutation's cycles, l_i is a length of cycle.    
+    N is count of permutation's cycles, l_i is a length of i-th cycle.    
 """
 
 
 class Parking:
-    """Data structure to represent the start and end states
-        and the sequence of moves. The empty slot is represented as 0.
+    """Data structure which represents the start and end states
+        and the sequence of moves.
+        The empty slot is represented as 0.
 
     Attributes:
         self.start: start state.
-        self.inverse_start: stores places of each car
-            and empty slot for the start state.
+        self.inverse_start: stores places of each car and empty
+        slot for the start state.
         self.end: end state.
-        self.inverse_end: stores places of each car
-            and empty slot for the end state.
-        self.n: size of parking.
+        self.inverse_end: stores places of each car and empty
+        slot for the end state.
+        self.n: number of parking slots.
         self.incorrect_cars: set of numbers of cars that are on wrong places.
-        self.current, self.inverse_current: current state (after some moves).
+        self.current, self.inverse_current: current state and its inverse (after some moves).
     """
     def __init__(self, start, end):
         """
         Args:
             start: start state. List, permutation of numbers
-            from 0 to size of parking.
+            from 0 to size of parking - 1.
             end: end state. List, permutation of numbers
-            from 0 to size of parking.
+            from 0 to size of parking - 1.
 
         Raises:
             ValueError: incorrect input.
