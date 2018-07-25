@@ -27,7 +27,7 @@ Fewer moves:
 """
 
 import logging
-from typing import List, Tuple, T, Generator
+from typing import List, Tuple, Generator, T
 
 logging.basicConfig(filename="code.log", filemode='w', level=logging.DEBUG)
 
@@ -72,7 +72,8 @@ class Parking:
         logging.debug(("end: ", self.end))
         logging.debug(("incorrect cars: ", self._incorrect_cars))
 
-    def _validate_input(self, start: int, end: int):
+    @staticmethod
+    def _validate_input(start: List[int], end: List[int]):
         """Validates the input by checking type and value consistency."""
         if not type(start) == type(end) == list:
             raise ValueError("Incorrect input! start, end should be lists")
