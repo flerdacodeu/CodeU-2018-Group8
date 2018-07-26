@@ -23,8 +23,8 @@ class ParkingTest(unittest.TestCase):
                              [(2, 2), (1, 1), (3, 0)])
 
     def test_incorrect_data_types(self):
-        self.assertRaises(ValueError, Parking, {1, 2, 3, 0}, {1, 2, 3, 0})
-        self.assertRaises(ValueError, Parking, None, None)
+        self.assertRaises(TypeError, Parking, {1, 2, 3, 0}, {1, 2, 3, 0})
+        self.assertRaises(TypeError, Parking, None, None)
 
     def test_incorrect_data_values_no_empty_slot(self):
         self.assertRaises(ValueError, Parking, [1, 2, 3, 4], [1, 2, 3, 0])

@@ -27,10 +27,11 @@ Fewer moves:
 """
 
 import logging
-from typing import List, Tuple, Generator, T
+from typing import List, Tuple, Generator, TypeVar
 
 logging.basicConfig(filename="code.log", filemode='w', level=logging.DEBUG)
 
+T = TypeVar('T')
 _MoveType = Tuple[int, int]
 
 
@@ -45,7 +46,6 @@ class Parking:
     Attributes:
         self.start: start state.
         self.end: end state.
-        self.n_cars: number of parking slots.
         self._incorrect_cars: set of numbers of cars that are on wrong places.
         self._current: current state.
         self._inverse_current: stores positions of each car.
@@ -59,7 +59,6 @@ class Parking:
 
         self.start = start
         self.end = end
-        self.n_cars = len(start)
         self.empty = empty
 
         self._incorrect_cars = {car for car, end_car in zip(start, end)
@@ -72,11 +71,14 @@ class Parking:
         logging.debug(("end: ", self.end))
         logging.debug(("incorrect cars: ", self._incorrect_cars))
 
+    def __len__(self):
+        return len(self.start)
+
     @staticmethod
     def _validate_input(start: List[int], end: List[int]):
         """Validates the input by checking type and value consistency."""
         if not type(start) == type(end) == list:
-            raise ValueError("Incorrect input! start, end should be lists")
+            raise TypeError("Incorrect input! start, end should be lists")
         if len(start) != len(end):
             raise ValueError(f"Incorrect input! len(start) {len(start)} != "
                              f"len(end) {len(end)}")
