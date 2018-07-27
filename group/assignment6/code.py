@@ -44,24 +44,24 @@ class Parking:
         empty: Representation of the empty slot.
 
     Attributes:
-        self.start: start state.
-        self.end: end state.
-        self._incorrect_cars: set of numbers of cars that are on wrong places.
-        self._current: current state.
-        self._inverse_current: stores positions of each car.
+        self.start: Start state.
+        self.end: End state.
+        self._displaced_cars: Set of car ids that are in wrong places.
+        self._current: Current state.
+        self._inverse_current: Map storing positions of each car.
 
     Raises:
-        ValueError: Incorrect input.
+        ValueError: Invalid input.
     """
 
     def __init__(self, start: List[int], end: List[int], empty: T = 0):
-        self._validate_input(start, end)
+        self._validate_input(start, end, empty)
 
         self.start = start
         self.end = end
         self.empty = empty
 
-        self._incorrect_cars = {car for car, end_car in zip(start, end)
+        self._displaced_cars = {car for car, end_car in zip(start, end)
                                 if car != end_car and car != empty}
         self._end_empty_position = self.end.index(self.empty) if end else None
         self._current = self.start.copy()
@@ -69,22 +69,24 @@ class Parking:
 
         logging.debug(("start: ", self.start))
         logging.debug(("end: ", self.end))
-        logging.debug(("incorrect cars: ", self._incorrect_cars))
+        logging.debug(("displaced cars: ", self._displaced_cars))
 
     def __len__(self):
         return len(self.start)
 
     @staticmethod
-    def _validate_input(start: List[int], end: List[int]):
+    def _validate_input(start: List[int], end: List[int], empty: T):
         """Validates the input by checking type and value consistency."""
-        if not type(start) == type(end) == list:
+        if not isinstance(start, list) or not isinstance(end, list):
             raise TypeError("Incorrect input! start, end should be lists")
         if len(start) != len(end):
             raise ValueError(f"Incorrect input! len(start) {len(start)} != "
                              f"len(end) {len(end)}")
-        if sorted(start) != sorted(end):
+        if set(start) != set(end):
             raise ValueError("Incorrect input! Both start and end lists "
                              "should contain the same cars.")
+        if len(start) > 0 and start.count(empty) != 1:
+            raise ValueError('Invalid input: expected one empty slot.')
 
     def get_moves(self) -> List[_MoveType]:
         """Computes a sequence of moves from the start state to the end state.
@@ -92,24 +94,37 @@ class Parking:
         Returns:
             A list of moves leading from the start state to the end state.
         """
-        return list(self._get_moves())
+        return list(self._get_optimal_moves())
 
-    def _get_moves(self) -> Generator[_MoveType, None, None]:
+    def _get_optimal_moves(self) -> Generator[_MoveType, None, None]:
         """Generates a sequence of moves from the start state to the end state.
+
+        We can't decrease the count of incorrectly parked cars by more
+        than 1 for one movement.
+        If the empty slot is not in the right place we can decrease
+        count of incorrect cars by 1 (we can move correct car to empty place).
+        If initially the empty slot is in the right place we can neither
+        decrease not increase the count of incorrect cars
+        (we can move any incorrect car to empty place).
+
+        Number of times when the empty slot will be on its right place equals
+        to the number of cycles in the permutation.
+        So, minimal count of movements = SUM (l_i + 1), where i from 1 to N,
+        N is the count of permutation's cycles, l_i is a length of i-th cycle.
 
         Yields:
             A car move (car, target position).
         """
-        while self._incorrect_cars:
+        while self._displaced_cars:
             # the empty slot is in the right place
             if self._inverse_current[self.empty] == self._end_empty_position:
-                incorrect_car = self._incorrect_cars.pop()  # any car
-                yield self._swap(incorrect_car)
-                self._incorrect_cars.add(incorrect_car)
+                displaced_car = self._displaced_cars.pop()  # any car
+                yield self._swap(displaced_car)
+                self._displaced_cars.add(displaced_car)
             # in the place of the empty slot should be another car
-            incorrect_car = self.end[self._inverse_current[self.empty]]
-            yield self._swap(incorrect_car)
-            self._incorrect_cars.discard(incorrect_car)
+            displaced_car = self.end[self._inverse_current[self.empty]]
+            yield self._swap(displaced_car)
+            self._displaced_cars.discard(displaced_car)
 
     def _swap(self, x: int) -> _MoveType:
         """Moves the car #x to the empty slot.

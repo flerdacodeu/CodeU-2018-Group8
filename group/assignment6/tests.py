@@ -30,7 +30,6 @@ class ParkingTest(unittest.TestCase):
         self.assertRaises(ValueError, Parking, [1, 2, 3, 4], [1, 2, 3, 0])
         self.assertRaises(ValueError, Parking, [1, 2, 3, 0], [1, 2, 3, 4])
 
-    @unittest.skip  # TODO: should we check this?
     def test_incorrect_data_values_two_empty_slots(self):
         self.assertRaises(ValueError, Parking, [1, 2, 0, 0], [0, 0, 1, 2])
 
