@@ -24,24 +24,24 @@ class StateTest(unittest.TestCase):
         _state1 = ParkingState([1, 2, 3], 1)
         _state2 = ParkingState([3, 2, 1], 1)
         try:
-            _state1.validate_states(_state2)
+            _state1._validate_two_states(_state2)
         except ValueError:
             self.fail("Raised ValueError unexpectedly.")
 
     def test_inconsistent_states_different_elements(self):
         _state1 = ParkingState([1, 2, 3], 1)
         _state2 = ParkingState([1, 2, 5], 1)
-        self.assertRaises(ValueError, _state1.validate_states, _state2)
+        self.assertRaises(ValueError, _state1._validate_two_states, _state2)
 
     def test_inconsistent_states_size_mismatch(self):
         _state1 = ParkingState([1, 2], 1)
         _state2 = ParkingState([1, 2, 3], 1)
-        self.assertRaises(ValueError, _state1.validate_states, _state2)
+        self.assertRaises(ValueError, _state1._validate_two_states, _state2)
 
     def test_inconsistent_states_different_empty_slot_symbol(self):
         _state1 = ParkingState([1, 2, 3], 1)
         _state2 = ParkingState([1, 2, 3], 2)
-        self.assertRaises(ValueError, _state1.validate_states, _state2)
+        self.assertRaises(ValueError, _state1._validate_two_states, _state2)
 
     def test_compare_identical(self):
         _state1 = ParkingState([1, 2, 3], 1)

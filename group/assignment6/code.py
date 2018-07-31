@@ -45,7 +45,7 @@ class ParkingState:
     """
 
     def __init__(self, input_list, empty_slot=0):
-        self.validate(input_list, empty_slot)
+        self._validate_state(input_list, empty_slot)
         self.cars = input_list
         self.symbol_empty = empty_slot
 
@@ -54,7 +54,7 @@ class ParkingState:
         self.cars[x_ind], self.cars[y_ind] = self.cars[y_ind], self.cars[x_ind]
 
     @staticmethod
-    def validate(state, symbol_empty):
+    def _validate_state(state, symbol_empty):
         """
         Validates if technical and parking lot state properties hold for the input.
         This includes:
@@ -78,7 +78,7 @@ class ParkingState:
         if len(state) != len(set(state)):
             raise ValueError('Invalid input: duplicate element(s) found.')
 
-    def validate_states(self, state):
+    def _validate_two_states(self, state):
         if len(self.cars) != len(state):
             raise ValueError(f"States' lengths mismatch, {len(self)} != {len(state)}")
         if self.get_symbol_empty() != state.get_symbol_empty():
@@ -93,7 +93,7 @@ class ParkingState:
         :param state: [ParkingState] instance of State
         :return: [set of objects] the different elements of self.cars
         """
-        self.validate_states(state)
+        self._validate_two_states(state)
         return {car for car, end_car in zip(self.cars, state.get())
                 if car != end_car and car != self.symbol_empty}
 
@@ -173,11 +173,11 @@ class ParkingLot:
         :param constraints: [dict] of <int, set> pairs, denoting <positions, allowed_cars>
         
         Raises:
-            TypeError & ValueError, see ParkingState.validate()
+            TypeError & ValueError, see ParkingState._validate()
         """
         self.state = ParkingState(start, empty)
         if constraints is not None:
-            self.validate_constraints(constraints)
+            self._validate_constraints(constraints)
         self.constraints = constraints
 
     def __len__(self):
@@ -199,8 +199,8 @@ class ParkingLot:
         and the latter is the position to which car should be moved
         """
         target_state = ParkingState(target_state, self.state.get_symbol_empty())
-        self.state.validate_states(target_state)
-        self.validate_feasibility(target_state)
+        self.state._validate_two_states(target_state)
+        self._validate_feasibility(target_state)
 
         _current_state = self.state if not retain_state else copy.deepcopy(self.state)
 
@@ -216,7 +216,7 @@ class ParkingLot:
         """
         return self.state.get()
 
-    def validate_constraints(self, constraints):
+    def _validate_constraints(self, constraints):
         """
         The given conditions:
             1) must be dictionary of < int, set > pairs;
@@ -242,7 +242,7 @@ class ParkingLot:
                 raise TypeError(f"Unsupported position type: {type(position)}. "
                                 f"Expected int.")
             if not isinstance(cars, set):
-                raise TypeError(f"Unsupported position type: {type(cars)}. "
+                raise TypeError(f"Unsupported cars type: {type(cars)}. "
                                 f"Expected set.")
             if not 0 <= position <= len(self):
                 raise ValueError(f"Out of bounds. {position} not in [0, {len(self)}]")
@@ -254,10 +254,10 @@ class ParkingLot:
 
     def update_constraints(self, constraints):
         if constraints is not None:
-            self.validate_constraints(constraints)
+            self._validate_constraints(constraints)
         self.constraints = constraints
 
-    def validate_feasibility(self, target_state):
+    def _validate_feasibility(self, target_state):
         """
         Checks for contradiction between the constraints and the target state.
         
