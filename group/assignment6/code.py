@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
-"""Computes a sequence of moves from the start state to the end state."""
+"""Computes a sequence of moves from the start state to the end state.
+
+1) Defines a data structure to represent the start and end states (ParkingState)
+and the sequence of moves (List[_MoveType]).
+2) Computes the sequence of moves to go from the start to the end state with
+fewer moves.
+3) Computes a sequence of moves that enforces a set of constraints.
+4) Computes all the possible sequence of moves that lead from the start to
+the end state without ever repeating the same configuration more than once.
+"""
 
 import copy
-import logging
-from typing import List, Set, Dict, Hashable, NamedTuple, Generator, Optional
-
-logging.basicConfig(filename="parking.log", filemode="w", level=logging.DEBUG)
+from typing import List, Set, Dict, Hashable, NamedTuple, Generator, Tuple
 
 _CarType = Hashable
 _MoveType = NamedTuple("_MoveType", [("car", "_CarType"), ("to", int)])
 
 
-class _ParkingState:
+class ParkingState:
     """Implements a wrapper of a list representing the state of a parking lot.
 
     Attributes:
@@ -25,7 +31,6 @@ class _ParkingState:
         self.cars = input_list
         self.symbol_empty = empty_slot
         self._positions = {car: index for index, car in enumerate(self.cars)}
-        self._seen_states = set()
 
     def __len__(self):
         return len(self.cars)
@@ -60,121 +65,74 @@ class _ParkingState:
         if len(state) != len(set(state)):
             raise ValueError("Invalid input: duplicate element(s) found.")
 
-    def _get_next_fewer_move(self, displaced_cars: Set[_CarType],
-                             target_state: "_ParkingState") -> Generator[
-        _MoveType, None, None]:
-        """Generates a sequence of moves from the start state to the end state.
+    def generate_all_paths(self, current_moves: List[_MoveType],
+                           target_state: "ParkingState",
+                           displaced_cars: Set[_CarType], seen_states,
+                           constraints: Dict[int, Set[_CarType]]) \
+            -> Generator[List[_MoveType], None, None]:
+        """Finds all paths leading from the current state to the target state.
 
-        We can't decrease the count of incorrectly parked cars by more
-        than 1 for one movement.
-        If the empty slot is not in the right place we can decrease
-        count of incorrect cars by 1 (we can move correct car to empty place).
-        If initially the empty slot is in the right place we can neither
-        decrease not increase the count of incorrect cars
-        (we can move any incorrect car to empty place).
-        Number of times when the empty slot will be on its right place equals
-        to the number of cycles in the permutation.
-        So, minimal count of movements = SUM (l_i + 1), where i from 1 to N,
-        N is the count of permutation's cycles, l_i is a length of i-th cycle.
+        It does not have a single sequence that has the same parking lot
+        configuration (positions of cars in the parking lot) more than once,
+        however, different paths can share the same state.
 
-        Yields:
-            A car move (car, target position).
-        """
-        while displaced_cars:
-            empty_position = self._positions[self.symbol_empty]
-            # the empty slot is in the right place
-            if empty_position == target_state._positions[self.symbol_empty]:
-                displaced_car = displaced_cars.pop()  # any displaced car
-                yield self._swap_cars_and_pos(self._positions[displaced_car],
-                                              self._positions[
-                                                  self.symbol_empty])
-                displaced_cars.add(displaced_car)
-            # in the place of the empty slot there should be another car
-            displaced_car = target_state[self._positions[self.symbol_empty]]
-            yield self._swap_cars_and_pos(self._positions[displaced_car],
-                                          self._positions[self.symbol_empty])
-            displaced_cars.discard(displaced_car)
-
-    def _get_next_constrained_move(self, current_moves: List[_MoveType],
-                                   target_state: "_ParkingState",
-                                   displaced_cars: Set[_CarType],
-                                   constraints: Dict[
-                                       int, Set[_CarType]] = None) -> Optional[
-        List[_MoveType]]:
-        """Finds a constrained path from the current state to the target one.
-
-        It tries to make all feasible steps from the current state and
-        backtracks if no possible moves left. It does not go to the previous
-        step and stores all visited configurations to avoid infinite loops.
+        It uses a heuristic to start traversing feasible cars for the empty slot
+        with the target one. That is, it starts with a greedy algorithm and
+        backs off to all possible cars in case of constraints that prevent from
+        moving any displaced car into the empty place), see more in the
+        `_update_displaced_cars` method.
 
         Args:
             current_moves: A list of moves currently being done.
             target_state: The target arrangement of the cars.
             displaced_cars: A set of cars that are not in their right positions.
+            seen_states: A set of states that have already been visited in the
+            current path.
             constraints: A map of constraints telling which cars (values)
             can be moved to which slots (keys).
 
-        Returns:
-            None if there is no solution,
-            otherwise a list of moves leading to the target state.
+        Yields:
+            List of car moves (car, target_position).
         """
         if not displaced_cars:
-            return current_moves
+            yield current_moves.copy()
+            return
 
         state = tuple(self.cars)
-        if state in self._seen_states:
+        if state in seen_states:
             return
-        self._seen_states.add(state)
+        seen_states.add(state)
 
         empty_position = self._positions[self.symbol_empty]
-        feasible_cars = self._get_feasible_cars(constraints, empty_position)
+        feasible_cars = self._rearrange_feasible_cars(constraints,
+                                                      empty_position,
+                                                      target_state)
         for next_car in feasible_cars:
             if current_moves and current_moves[-1].car == next_car:
-                continue
-            car_was_in_target = self._positions[next_car] == \
-                                target_state._positions[next_car]
-            car_moved_to_target = empty_position == target_state._positions[
-                next_car]
-            if car_was_in_target:
-                displaced_cars.add(next_car)
-            elif car_moved_to_target:
-                displaced_cars.remove(next_car)
-
+                continue  # a heuristic to not return straight back
+            car_moved_to_target, car_was_in_target \
+                = self._update_displaced_cars(displaced_cars, empty_position,
+                                              next_car, target_state)
             move = self._swap_cars_and_pos(self._positions[next_car],
                                            empty_position)
             current_moves.append(move)
             empty_position = self._positions[self.symbol_empty]
-            result = self._get_next_constrained_move(current_moves,
-                                                     target_state,
-                                                     displaced_cars,
-                                                     constraints)
-            if result is not None:
-                return result
-            else:
-                empty_position = self._restore_state(car_moved_to_target,
-                                                     car_was_in_target,
-                                                     current_moves,
-                                                     displaced_cars,
-                                                     empty_position,
-                                                     next_car)
-
-    def _restore_state(self, car_moved_to_target, car_was_in_target,
-                       current_moves, displaced_cars, empty_position,
-                       feasible_car) -> int:
-        """Restores the state when backtracking and returns the new empty slot."""
-        self._swap_cars_and_pos(self._positions[feasible_car],
-                                empty_position)
-        empty_position = self._positions[self.symbol_empty]
-        current_moves.pop()
-        if car_was_in_target:
-            displaced_cars.remove(feasible_car)
-        elif car_moved_to_target:
-            displaced_cars.add(feasible_car)
-        return empty_position
+            next_moves = self.generate_all_paths(current_moves, target_state,
+                                                 displaced_cars, seen_states,
+                                                 constraints)
+            yield from next_moves
+            self._restore_state(car_moved_to_target,
+                                car_was_in_target,
+                                current_moves,
+                                displaced_cars,
+                                empty_position,
+                                next_car)
+            empty_position = self._positions[self.symbol_empty]
+        seen_states.remove(state)
 
     def _get_feasible_cars(self, constraints: Dict[int, Set[_CarType]],
                            position_empty: int) -> Set[_CarType]:
-        """Returns set of cars that can be moved to position_empty.
+        """Returns the set of cars that can be moved to position_empty.
 
         Args:
             constraints: A map of constraints, where a constraint is the fact
@@ -189,7 +147,86 @@ class _ParkingState:
         else:
             return set(self.cars) - {self.symbol_empty}
 
-    def _swap_cars_and_pos(self, x_ind: int, y_ind: int):
+    def _rearrange_feasible_cars(self, constraints, empty_position,
+                                 target_state):
+        """Puts the target car that needs to be in the empty position to idx 0.
+
+        A simple heuristic to start generating paths with a smaller number of
+        moves.
+
+        Args:
+            constraints: A map of constraints, where a constraint is the fact
+            that a certain parking place is reserved only for certain cars.
+            empty_position: Index of the empty slot in the current state.
+            target_state: Targeted state (arrangement of cars).
+
+        Returns:
+            Rearranged list of cars feasible from the empty position where
+            the first element is the target car that must be in the empty slot
+            (if possible).
+        """
+        feasible_cars = list(
+            self._get_feasible_cars(constraints, empty_position))
+        for idx, car in enumerate(feasible_cars):
+            if car == target_state[empty_position]:
+                feasible_cars[0], feasible_cars[idx] = (feasible_cars[idx],
+                                                        feasible_cars[0])
+                break
+        return feasible_cars
+
+    def _update_displaced_cars(self, displaced_cars: Set[_CarType],
+                               empty_pos: int,
+                               next_car: _CarType,
+                               target_state: "ParkingState") \
+            -> Tuple[bool, bool]:
+        """Checks how the state is changed by moving the car `next_car`.
+
+        We can't decrease the count of incorrectly parked cars by more
+        than 1 for one movement.
+        If the empty slot is not in the right place we can decrease
+        count of incorrect cars by 1 (we can move correct car to empty place).
+        If initially the empty slot is in the right place we can neither
+        decrease not increase the count of incorrect cars
+        (we can move any incorrect car to empty place).
+        Number of times when the empty slot will be on its right place equals
+        to the number of cycles in the permutation.
+        So, minimal count of movements = SUM (l_i + 1), where i from 1 to N,
+        N is the count of permutation's cycles, l_i is a length of i-th cycle.
+
+        Args:
+            displaced_cars: A set of cars that are not in their right positions.
+            empty_pos: Index of the currently empty slot.
+            next_car: The car being moved.
+            target_state: Targeted state (arrangement of cars).
+
+        Returns:
+            car_moved_to_target: True if the next car has been moved to its
+            right place, False otherwise.
+            car_was_in_target: True if the next car was already in its right
+            slot and now is incorrectly placed, False otherwise.
+        """
+        car_was_in_target = \
+            self._positions[next_car] == target_state._positions[next_car]
+        car_moved_to_target = empty_pos == target_state._positions[next_car]
+        if car_was_in_target:
+            displaced_cars.add(next_car)
+        elif car_moved_to_target:
+            displaced_cars.remove(next_car)
+        return car_moved_to_target, car_was_in_target
+
+    def _restore_state(self, car_moved_to_target, car_was_in_target,
+                       current_moves, displaced_cars, empty_position,
+                       feasible_car):
+        """Restores the state to the previous step while backtracking."""
+        self._swap_cars_and_pos(self._positions[feasible_car],
+                                empty_position)
+        current_moves.pop()
+        if car_was_in_target:
+            displaced_cars.discard(feasible_car)
+        elif car_moved_to_target:
+            displaced_cars.add(feasible_car)
+
+    def _swap_cars_and_pos(self, x_ind: int, y_ind: int) -> _MoveType:
         """Swaps two elements at the given positions and returns that move."""
         self.cars[x_ind], self.cars[y_ind] = self.cars[y_ind], self.cars[x_ind]
         self._positions[self.cars[x_ind]], self._positions[self.cars[y_ind]] = (
@@ -216,10 +253,11 @@ class ParkingLot:
 
     def __init__(self, start: List[_CarType], empty: _CarType = 0,
                  constraints: Dict[int, Set[_CarType]] = None):
-        self.state = _ParkingState(start, empty)
+        self.state = ParkingState(start, empty)
         if constraints is not None:
             self._validate_constraints(constraints)
         self.constraints = constraints
+        self._seen_states = set()
 
     def __len__(self):
         return len(self.state)
@@ -240,35 +278,47 @@ class ParkingLot:
             List of car moves (car, position) where car is any _CarType object,
             and the latter is the position to which car should be moved.
         """
-        target_state = _ParkingState(target_state,
-                                     self.state.symbol_empty)
+        target_state = ParkingState(target_state,
+                                    self.state.symbol_empty)
         self._validate_two_states(target_state)
         self._validate_feasibility(target_state)
         displaced_cars = self._find_diff(target_state)
         current_state = self.state if not retain_state else copy.deepcopy(
             self.state)
-        if self.constraints is None:
-            return list(
-                current_state._get_next_fewer_move(displaced_cars,
-                                                   target_state))
-        else:
-            return current_state._get_next_constrained_move(
-                current_moves=[],
-                target_state=target_state,
-                displaced_cars=displaced_cars,
-                constraints=self.constraints)
+        return next(current_state.generate_all_paths([], target_state,
+                                                     displaced_cars,
+                                                     self._seen_states,
+                                                     self.constraints),
+                    None)
 
-    def _validate_two_states(self, state: "_ParkingState"):
-        if len(self.state.cars) != len(state):
-            raise ValueError(
-                f"States' lengths mismatch, {len(self.state)} != {len(state)}")
-        if self.state.symbol_empty != state.symbol_empty:
-            raise ValueError(
-                f"The two states have different empty slot symbols: "
-                f"{self.state.symbol_empty} & {state.symbol_empty}.")
-        if set(self.state.cars) != set(state.cars):
-            raise ValueError(
-                "The two sets of cars are different. Cannot find moves.")
+    def get_all_paths(self, target_state, retain_state=False):
+        """Computes all possible paths leading from the state to the target state.
+
+        It does not have a single sequence that has the same parking lot
+        configuration (positions of cars in the parking lot) more than once,
+        however, different paths can share the same state.
+
+        Args:
+            target_state: Targeted state (arrangement of cars).
+            retain_state: Retains self.state unchanged if True,
+            updates it as moves are generated if False.
+
+        Returns:
+            A list of all possible paths leading from the start state to the
+            target state, sorted by length (shortest first).
+        """
+        target_state = ParkingState(target_state,
+                                    self.state.symbol_empty)
+        self._validate_two_states(target_state)
+        self._validate_feasibility(target_state)
+        displaced_cars = self._find_diff(target_state)
+        current_state = copy.deepcopy(
+            self.state) if retain_state else self.state
+        return sorted(
+            current_state.generate_all_paths([], target_state, displaced_cars,
+                                             self._seen_states,
+                                             self.constraints),
+            key=lambda path: len(path))
 
     def _validate_constraints(self, constraints: Dict[int, Set[_CarType]]):
         """Validates if constraints are applicable to the input.
@@ -304,7 +354,20 @@ class ParkingLot:
 
             constraints[position].add(self.state.symbol_empty)
 
-    def _validate_feasibility(self, target_state: _ParkingState):
+    def _validate_two_states(self, state: "ParkingState"):
+        """Validates if the current state can be led to the target state."""
+        if len(self.state.cars) != len(state):
+            raise ValueError(
+                f"States' lengths mismatch, {len(self.state)} != {len(state)}")
+        if self.state.symbol_empty != state.symbol_empty:
+            raise ValueError(
+                f"The two states have different empty slot symbols: "
+                f"{self.state.symbol_empty} & {state.symbol_empty}.")
+        if set(self.state.cars) != set(state.cars):
+            raise ValueError(
+                "The two sets of cars are different. Cannot find moves.")
+
+    def _validate_feasibility(self, target_state: ParkingState):
         """Checks for contradiction between constraints and the target state.
 
         Args:
@@ -321,7 +384,7 @@ class ParkingLot:
                 raise ValueError(
                     "Found contradiction between constraints and target state.")
 
-    def _find_diff(self, state: "_ParkingState") -> Set[_CarType]:
+    def _find_diff(self, state: "ParkingState") -> Set[_CarType]:
         """Returns elements of current state that differ from those of state."""
         self._validate_two_states(state)
         return {car for car, end_car in zip(self.state.cars, state.cars)
