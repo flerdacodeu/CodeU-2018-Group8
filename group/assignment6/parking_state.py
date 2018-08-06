@@ -138,13 +138,13 @@ class ParkingState:
             A set of cars that can be moved to position_empty.
         """
         if constraints is not None and position_empty in constraints:
-            return set(constraints[position_empty]) - {self.symbol_empty}
+            return constraints[position_empty] - {self.symbol_empty}
         else:
             return set(self.cars) - {self.symbol_empty}
 
     def _rearrange_feasible_cars(self, constraints, empty_position,
                                  target_state):
-        """Puts the target car that needs to be in the empty position to idx 0.
+        """Generates cars feasible from the empty slot with the target car first.
 
         A simple heuristic to start generating paths with a smaller number of
         moves.
@@ -155,19 +155,15 @@ class ParkingState:
             empty_position: Index of the empty slot in the current state.
             target_state: Targeted state (arrangement of cars).
 
-        Returns:
-            Rearranged list of cars feasible from the empty position where
-            the first element is the target car that must be in the empty slot
-            (if possible).
+        Yields:
+            A car feasible from the empty position where the first element is
+            the target car that must be in the empty slot (if possible).
         """
-        feasible_cars = list(
-            self._get_feasible_cars(constraints, empty_position))
-        for idx, car in enumerate(feasible_cars):
-            if car == target_state[empty_position]:
-                feasible_cars[0], feasible_cars[idx] = (feasible_cars[idx],
-                                                        feasible_cars[0])
-                break
-        return feasible_cars
+        target_car = target_state[empty_position]
+        feasible_cars = self._get_feasible_cars(constraints, empty_position)
+        if target_car in feasible_cars:
+            yield target_car
+        yield from (car for car in feasible_cars if car != target_car)
 
     def _update_displaced_cars(self, displaced_cars: Set[CarType],
                                empty_pos: int,
@@ -176,16 +172,16 @@ class ParkingState:
             -> Tuple[bool, bool]:
         """Checks how the state is changed by moving the car `next_car`.
 
-        One move of a car can decrease the total number of incorrectly parked 
-        cars by 1 at the maximum, where incorrectly parked cars are those 
+        One move of a car can decrease the total number of incorrectly parked
+        cars by 1 at the maximum, where incorrectly parked cars are those
         whose current position differs from the target one.
         There exist two cases:
-            1) If the empty slot is not in the right place we can decrease 
+            1) If the empty slot is not in the right place we can decrease
             count of incorrect cars by 1 (we can move the correct car to the
             empty place).
-            2) If initially the empty slot is in the right place we cannot 
+            2) If initially the empty slot is in the right place we cannot
             decrease the total number of incorrectly parked cars with a one
-            move. The optimal move in this case is not to increase it (we 
+            move. The optimal move in this case is not to increase it (we
             can move an incorrect car to the empty place).
         Number of times when the empty slot will be on its right place equals
         to the number of cycles in the permutation.

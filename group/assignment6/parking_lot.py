@@ -16,8 +16,9 @@ configuration more than once.
 """
 
 import copy
+from typing import List, Set, Dict
+
 from parking_state import ParkingState, CarType, MoveType
-from typing import List, Set, Dict, Hashable, NamedTuple, Generator, Tuple
 
 
 class ParkingLot:
@@ -63,18 +64,20 @@ class ParkingLot:
             List of car moves (car, position) where car is any CarType object,
             and the latter is the position to which car should be moved.
         """
-        target_state = ParkingState(target_state,
-                                    self.state.symbol_empty)
+        state, target_state = self._prepare_states(retain_state, target_state)
+        return next(state.generate_all_paths([], target_state,
+                                             self._find_diff(target_state),
+                                             self._seen_states,
+                                             self.constraints),
+                    None)
+
+    def _prepare_states(self, retain_state, target_state):
+        """Creates and validates the current and target ParkingState objects."""
+        target_state = ParkingState(target_state, self.state.symbol_empty)
         self._validate_two_states(target_state)
         self._validate_feasibility(target_state)
-        displaced_cars = self._find_diff(target_state)
-        current_state = self.state if not retain_state else copy.deepcopy(
-            self.state)
-        return next(current_state.generate_all_paths([], target_state,
-                                                     displaced_cars,
-                                                     self._seen_states,
-                                                     self.constraints),
-                    None)
+        state = self.state if not retain_state else copy.deepcopy(self.state)
+        return state, target_state
 
     def get_all_paths(self, target_state, retain_state=False):
         """Computes all possible paths leading from the state to the target state.
@@ -92,17 +95,11 @@ class ParkingLot:
             A list of all possible paths leading from the start state to the
             target state, sorted by length (shortest first).
         """
-        target_state = ParkingState(target_state,
-                                    self.state.symbol_empty)
-        self._validate_two_states(target_state)
-        self._validate_feasibility(target_state)
-        displaced_cars = self._find_diff(target_state)
-        current_state = copy.deepcopy(
-            self.state) if retain_state else self.state
+        state, target_state = self._prepare_states(retain_state, target_state)
         return sorted(
-            current_state.generate_all_paths([], target_state, displaced_cars,
-                                             self._seen_states,
-                                             self.constraints),
+            state.generate_all_paths([], target_state,
+                                     self._find_diff(target_state),
+                                     self._seen_states, self.constraints),
             key=lambda path: len(path))
 
     def _validate_constraints(self, constraints: Dict[int, Set[CarType]]):
