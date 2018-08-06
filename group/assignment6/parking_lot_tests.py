@@ -1,34 +1,7 @@
 #!/usr/bin/python3
 import unittest
-
-from code import ParkingLot, ParkingState
-
-
-class ParkingStateTest(unittest.TestCase):
-    def test_empty_state(self):
-        self.assertListEqual(ParkingState([], "").cars, [])
-
-    def test_basic_state(self):
-        cars = [1, 2]
-        state = ParkingState(cars, 1)
-        self.assertListEqual(state.cars, cars)
-
-    def test_invalid_empty_spot_symbol_not_present(self):
-        self.assertRaises(ValueError, ParkingState, [1, 2, 3], "a")
-        self.assertRaises(ValueError, ParkingState, [1, 2, 3], 4)
-
-    def test_invalid_input_two_empty_slots(self):
-        self.assertRaises(ValueError, ParkingState, [1, 2, 0, 0], 0)
-
-    def test_no_swap(self):
-        state1 = ParkingState([1, 2, 3], 1)
-        state1._swap_cars_and_pos(0, 0)
-        self.assertEqual(state1.cars, [1, 2, 3])
-
-    def test_swap(self):
-        state1 = ParkingState([1, 2, 3], 1)
-        state1._swap_cars_and_pos(1, state1._positions[state1.symbol_empty])
-        self.assertEqual(state1.cars, [2, 1, 3])
+from parking_state import ParkingState
+from parking_lot import ParkingLot
 
 
 class ParkingLotTest(unittest.TestCase):
@@ -193,7 +166,7 @@ class ParkingLotAllPathsTest(unittest.TestCase):
         self.assertIn([(1, 2), (2, 0), (1, 1)], result)
         self.assertIn([(3, 2), (1, 3), (2, 0), (1, 1), (3, 3)], result)
         # checking uniqueness of paths
-        self.assertEquals(len(result), len({tuple(path) for path in result}))
+        self.assertEqual(len(result), len({tuple(path) for path in result}))
 
     def test_parking_all_paths_from_example(self):
         parking_lot = ParkingLot([1, 2, 0, 3])
@@ -201,7 +174,7 @@ class ParkingLotAllPathsTest(unittest.TestCase):
         self.assertIn([(2, 2), (1, 1), (3, 0)], result)
         self.assertIn([(3, 2), (1, 3), (2, 0), (1, 1), (2, 3), (3, 0), (2, 2)],
                       result)
-        self.assertEquals(len(result), len({tuple(path) for path in result}))
+        self.assertEqual(len(result), len({tuple(path) for path in result}))
 
 
 if __name__ == "__main__":
